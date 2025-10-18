@@ -1,4 +1,4 @@
-| **ID**                | **User Story**                                                                                     | **Story Points** |  **Risk** |   **Priority**  | **Halfway point** 
+| **ID**                | **User Story**                                                                                     | **Story Points** |  **Risk** |   **Priority**  |
 | :-------------------- | :------------------------------------------------------------------------------------------------- | :--------------: | :------: | :-------------: | 
 | **US 01.01.01**       | As an entrant, I want to join the waiting list for a specific event.                               |         3        |    Low   |  **Must Have**  |
 | **US 01.01.02**       | As an entrant, I want to leave the waiting list for a specific event.                              |         2        |    Low   | **Should Have** |
