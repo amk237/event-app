@@ -41,16 +41,16 @@
 | **US 02.06.03**       | As an organizer, I want to see a final list of confirmed entrants.                                 |         3        |    Low   | **Should Have** |              ✅           |
 | **US 02.06.04**       | As an organizer, I want to cancel entrants who did not sign up.                                    |         3        |  Medium  | **Should Have** |             ✅            |
 | **US 02.06.05**       | As an organizer, I want to export the final list in CSV format.                                    |         5        |  Medium  | **Should Have** |                         |
-| **US 03.01.01**       | As an administrator, I want to remove events.                                                      |        3         |   Low    | **Should Have**   |                         |
+| **US 03.01.01**       | As an administrator, I want to remove events.                                                      |        3         |   Low    | **Should Have**   |           ✅              |
 | **US 03.02.01**       | As an administrator, I want to remove profiles.                                                    |        3         |   Low    | **Should Have**   |                         |
-| **US 03.03.01**       | As an administrator, I want to remove uploaded images.                                             |        3         |   Low    | **Could Have**    |                         |
-| **US 03.04.01**       | As an administrator, I want to browse all events.                                                  |        3         |   Low    | **Should Have**   |                         |
+| **US 03.03.01**       | As an administrator, I want to remove uploaded images.                                             |        3         |   Low    | **Could Have**    |            ✅             |
+| **US 03.04.01**       | As an administrator, I want to browse all events.                                                  |        3         |   Low    | **Should Have**   |            ✅             |
 | **US 03.05.01**       | As an administrator, I want to browse all profiles.                                                |        3         |   Low    | **Should Have**   |                         |
-| **US 03.06.01**       | As an administrator, I want to browse images uploaded by users.                                    |        3         |   Low    | **Could Have**    |                         |
+| **US 03.06.01**       | As an administrator, I want to browse images uploaded by users.                                    |        3         |   Low    | **Could Have**    |            ✅             |
 | **US 03.07.01**       | As an administrator, I want to remove organizers violating policy.                                 |        5         |  Medium  | **Should Have**   |                         |
 | **US 03.08.01**       | As an administrator, I want to review logs of all notifications sent by organizers.                |        5         |  Medium  | **Could Have**    |                         |
 | **US 03.09.01**       | As an administrator, I want to view system-wide statistics on event registrations and lottery draws.|        5         |  Medium  | **Could Have**    |                         |
 | **US 03.10.01**       | As an administrator, I want to manage notification templates used across the app.                  |        5         |  Medium  | **Could Have**    |                         |
 | **US 03.11.01**       | As an administrator, I want to audit geolocation usage for privacy compliance.                     |        8         |   High   | **Could Have**    |                         |
-| **US 03.12.01**       | As an administrator, I want to flag events with high cancellation rates for review.                |        5         |  Medium  | **Could Have**    |                         |
-| **US 03.13.01**       | As an administrator, I want to export platform usage reports for internal review.                  |        5         |  Medium  | **Could Have**    |                         |
+| **US 03.12.01**       | As an administrator, I want to flag events with high cancellation rates for review.                |        5         |  Medium  | **Could Have**    |             ✅            |
+| **US 03.13.01**       | As an administrator, I want to export platform usage reports for internal review.                  |        5         |  Medium  | **Could Have**    |           ✅              |
