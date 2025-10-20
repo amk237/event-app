@@ -1,3 +1,6 @@
+# Event-App CRC Cards
+---
+
 ***Class*** Event
 
 | **Responsibilities** | **Collaborators** |
@@ -18,6 +21,7 @@
 **Comments / Refs:**  
 - US 01.02.01–01.02.04  
 
+---
 
 ***Class*** WaitingListEntry
 
@@ -28,6 +32,7 @@
 **Comments / Refs:**  
 - US 01.01.01–01.01.02, US 01.05.04  
 
+---
 
 ***Class*** Selection
 
@@ -38,6 +43,7 @@
 **Comments / Refs:**  
 - US 01.05.02, US 01.05.03, US 02.06.01–02.06.03  
 
+---
 
 ***Class*** LotteryService
 
@@ -48,6 +54,7 @@
 **Comments / Refs:**  
 - US 02.05.02, US 02.05.03, US 01.05.01  
 
+---
 
 ***Class*** NotificationService
 
@@ -58,6 +65,7 @@
 **Comments / Refs:**  
 - US 01.04.01–01.04.03, US 02.05.01, US 02.07.01–02.07.03  
 
+---
 
 ***Class*** NotificationLog
 
@@ -68,6 +76,7 @@
 **Comments / Refs:**  
 - US 03.08.01  
 
+---
 
 ***Class*** QRService
 
@@ -78,6 +87,7 @@
 **Comments / Refs:**  
 - US 01.06.01, US 01.06.02, US 02.01.01  
 
+---
 
 ***Class*** Organizer
 
@@ -88,6 +98,7 @@
 **Comments / Refs:**  
 - US 02.01.01, US 02.01.04, US 02.02.01–02.02.03, US 02.06.01–02.06.05  
 
+---
 
 ***Class*** AdminService
 
@@ -98,6 +109,7 @@
 **Comments / Refs:**  
 - US 03.01.01–03.07.01, US 03.08.01  
 
+---
 
 ***Class*** PosterStorage
 
@@ -108,6 +120,7 @@
 **Comments / Refs:**  
 - US 02.04.01–02.04.02, US 03.03.01  
 
+---
 
 ***Class*** GeoService (optional)
 
@@ -118,6 +131,7 @@
 **Comments / Refs:**  
 - US 02.02.02, US 02.02.03  
 
+---
 
 ***Class*** DeviceIdProvider
 
@@ -128,6 +142,7 @@
 **Comments / Refs:**  
 - US 01.07.01  
 
+---
 
 ***Class*** EventRepository
 
@@ -138,6 +153,7 @@
 **Comments / Refs:**  
 - Firebase data storage for events  
 
+---
 
 ***Class*** ProfileRepository
 
@@ -148,6 +164,7 @@
 **Comments / Refs:**  
 - US 01.02.01–01.02.04  
 
+---
 
 ***Class*** WaitingListRepository
 
@@ -158,6 +175,7 @@
 **Comments / Refs:**  
 - US 01.01.01–01.01.02, US 02.05.01  
 
+---
 
 ***Class*** SelectionRepository
 
@@ -168,6 +186,7 @@
 **Comments / Refs:**  
 - US 01.05.02–01.05.03, US 02.06.01–02.06.03  
 
+---
 
 ***Class*** CsvExporter
 
@@ -178,6 +197,7 @@
 **Comments / Refs:**  
 - US 02.06.05  
 
+---
 
 ***Class*** Navigator
 
