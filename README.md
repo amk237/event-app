@@ -27,7 +27,8 @@ Whether you're looking to join exciting community events, organize your own lott
 
 All our Project Part 2 deliverables can be found in our wiki page.
 
-**Visit our wiki:** [https://github.com/CMPUT301F25spider/event-app/wiki](https://github.com/CMPUT301F25spider/event-app/wiki)
+**Visit our wiki:**  
+[https://github.com/CMPUT301F25spider/event-app/wiki](https://github.com/CMPUT301F25spider/event-app/wiki)
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
 
