@@ -25,14 +25,6 @@ Whether you're looking to join exciting community events, organize your own lott
 
 ## Wiki Page
 
-This wiki page contains everything you need to know about our app, including:
-* Detailed storyboards for all user flows
-* User stories and requirements mapping
-* Technical architecture and design decisions
-* API documentation and integration guides
-* Testing strategies and quality assurance
-* Sprint planning and retrospectives
-
 **Visit our wiki:** [https://github.com/CMPUT301F25spider/event-app/wiki](https://github.com/CMPUT301F25spider/event-app/wiki)
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
