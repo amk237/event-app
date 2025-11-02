@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
         TextView t = findViewById(R.id.editText);
         String input  = t.getText().toString();
         ((TextView)findViewById(R.id.output)).setText(input);
-        Log.d("input", "output");
+        Toast.makeText(this, input, Toast.LENGTH_LONG).show();
+        Log.d("input", input);
 
     }
 }
