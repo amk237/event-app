@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Internet permission for Firebase -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,10 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Event_App">
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-        <!-- Splash Screen Activity - First screen users see -->
+
+        <!-- Splash Screen Activity -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
@@ -24,10 +26,28 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Main Activity -->
+        </activity>
+
+        <!-- Profile Setup Activity -->
+        <activity
+            android:name=".ProfileSetupActivity"
+            android:exported="false" />
+
+        <!-- Main Activity (Entrant Home) -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
+
+        <!-- Organizer Home Activity -->
+        <activity
+            android:name=".OrganizerHomeActivity"
+            android:exported="false" />
+
+        <!-- Admin Home Activity -->
+        <activity
+            android:name=".AdminHomeActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
