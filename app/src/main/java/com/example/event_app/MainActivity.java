@@ -1,5 +1,6 @@
 package com.example.event_app;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -35,6 +36,16 @@ public class MainActivity extends AppCompatActivity {
         button.setText("Disabled");
     }
     public void handleText(View v){
+
+
+        Toast.makeText(this,"hi", Toast.LENGTH_LONG).show();
+        Log.d("input", "hi");
+
+    }
+    public void launchSettings(View v){
+        //launch a new activity
+        Intent i = new Intent(this,SettingsActivity.class );
+        startActivity(i);
         TextView t = findViewById(R.id.editText);
         String input  = t.getText().toString();
         ((TextView)findViewById(R.id.output)).setText(input);
