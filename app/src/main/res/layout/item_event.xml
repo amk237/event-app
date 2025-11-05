@@ -74,6 +74,13 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp" />
 
+        <Button
+            android:id="@+id/btnJoinLeave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join waiting list" />
+
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
