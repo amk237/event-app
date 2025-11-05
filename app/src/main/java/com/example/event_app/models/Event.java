@@ -1,8 +1,6 @@
 package com.example.event_app.models;
 
-import com.google.firebase.firestore.ServerTimestamp;
-
-import java.util.Date;
+import com.google.firebase.firestore.ServerTimestamp;import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,6 +53,142 @@ public class Event {
         this.totalAttending = 0;
     }
 
+    // --- Getters ---
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getOrganizerId() {
+        return organizerId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public Long getCapacity() {
+        return capacity;
+    }
+
+    public List<String> getWaitingList() {
+        return waitingList;
+    }
+
+    public List<String> getSignedUpUsers() {
+        return signedUpUsers;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public Date getRegistrationStartDate() {
+        return registrationStartDate;
+    }
+
+    public Date getRegistrationEndDate() {
+        return registrationEndDate;
+    }
+
+    public int getTotalSelected() {
+        return totalSelected;
+    }
+
+    public int getTotalCancelled() {
+        return totalCancelled;
+    }
+
+    public int getTotalAttending() {
+        return totalAttending;
+    }
+
+
+    // --- Setters ---
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setOrganizerId(String organizerId) {
+        this.organizerId = organizerId;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public void setCapacity(Long capacity) {
+        this.capacity = capacity;
+    }
+
+    public void setWaitingList(List<String> waitingList) {
+        this.waitingList = waitingList;
+    }
+
+    public void setSignedUpUsers(List<String> signedUpUsers) {
+        this.signedUpUsers = signedUpUsers;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setRegistrationStartDate(Date registrationStartDate) {
+        this.registrationStartDate = registrationStartDate;
+    }
+
+    public void setRegistrationEndDate(Date registrationEndDate) {
+        this.registrationEndDate = registrationEndDate;
+    }
+
+    public void setTotalSelected(int totalSelected) {
+        this.totalSelected = totalSelected;
+    }
+
+    public void setTotalCancelled(int totalCancelled) {
+        this.totalCancelled = totalCancelled;
+    }
+
+    public void setTotalAttending(int totalAttending) {
+        this.totalAttending = totalAttending;
+    }
+
+
+    // --- Logic Methods ---
+
     // Calculate cancellation rate
     public double getCancellationRate() {
         if (totalSelected == 0) {
@@ -67,42 +201,4 @@ public class Event {
     public boolean hasHighCancellationRate() {
         return getCancellationRate() > 30.0;
     }
-
-    public String getOrganizerId() {
-        return organizerId;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getPosterUrl() { return posterUrl; }
-    public void setPosterUrl(String posterUrl) {
-        this.posterUrl = posterUrl;
-    }
-
-    public Date getRegistrationEndDate() {return registrationEndDate;}
-
-    public List<String> getWaitingList() {return waitingList;}
-
-    public List<String> getSignedUpUsers() {return signedUpUsers;}
-
-    public Date getRegistrationStartDate() {return registrationStartDate;}
-
-    public long getCreatedAt() {
-        return createdAt;
-    }
-
-    // Setters
-    public void setEventId(String eventId) { this.eventId = eventId; }
-    public void setName(String name) { this.name = name; }
-    public void setDescription(String description) { this.description = description; }
-    public void setOrganizerId(String organizerId) { this.organizerId = organizerId; }
-    public void setStatus(String status) { this.status = status; }
-    public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
-    public void setTotalSelected(int totalSelected) { this.totalSelected = totalSelected; }
-    public void setTotalCancelled(int totalCancelled) { this.totalCancelled = totalCancelled; }
-    public void setTotalAttending(int totalAttending) { this.totalAttending = totalAttending; }
 }
-
-
