@@ -49,6 +49,10 @@
             android:name=".admin.AdminHomeActivity"
             android:exported="false" />
 
+        <!-- Organizer: Selected/Confirmed lists + cancel -->
+        <activity
+            android:name=".ui.OrganizerEntrantsListActivity"
+            android:exported="false" />
         <!-- Browse Events Activity -->
         <activity
             android:name=".admin.AdminBrowseEventsActivity"
