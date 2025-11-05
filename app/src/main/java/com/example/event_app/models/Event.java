@@ -1,5 +1,10 @@
 package com.example.event_app.models;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
+import java.util.List;
+
 /**
  * Event Model - Simplified version for halfway checkpoint
  * Represents an event in the LuckySpot system
@@ -13,6 +18,20 @@ public class Event {
     private String organizerId;
     private String status;  // "active", "cancelled", "completed"
     private long createdAt;
+    private String posterUrl; // Added for poster image
+
+    // Registration and Capacity
+    private Long capacity;
+    private List<String> waitingList;
+    private List<String> signedUpUsers;
+
+    // Timestamps
+    @ServerTimestamp
+    private Date date;
+    @ServerTimestamp
+    private Date registrationStartDate;
+    @ServerTimestamp
+    private Date registrationEndDate;
 
     // Lottery statistics (for cancellation tracking)
     private int totalSelected;      // Total number selected in lottery
@@ -49,16 +68,30 @@ public class Event {
         return getCancellationRate() > 30.0;
     }
 
-    // Getters
-    public String getEventId() { return eventId; }
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public String getOrganizerId() { return organizerId; }
-    public String getStatus() { return status; }
-    public long getCreatedAt() { return createdAt; }
-    public int getTotalSelected() { return totalSelected; }
-    public int getTotalCancelled() { return totalCancelled; }
-    public int getTotalAttending() { return totalAttending; }
+    public String getOrganizerId() {
+        return organizerId;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getPosterUrl() { return posterUrl; }
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
+    public Date getRegistrationEndDate() {return registrationEndDate;}
+
+    public List<String> getWaitingList() {return waitingList;}
+
+    public List<String> getSignedUpUsers() {return signedUpUsers;}
+
+    public Date getRegistrationStartDate() {return registrationStartDate;}
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
 
     // Setters
     public void setEventId(String eventId) { this.eventId = eventId; }
@@ -71,3 +104,5 @@ public class Event {
     public void setTotalCancelled(int totalCancelled) { this.totalCancelled = totalCancelled; }
     public void setTotalAttending(int totalAttending) { this.totalAttending = totalAttending; }
 }
+
+
