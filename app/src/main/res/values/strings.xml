@@ -1,4 +1,5 @@
 <resources>
+
     <string name="app_name">LuckySpot</string>
     <string name="pick_image">Pick Image</string>
     <string name="todo_2">TODO</string>
