@@ -22,6 +22,9 @@ public class Event {
     private Long capacity;
     private List<String> waitingList;
     private List<String> signedUpUsers;
+    private String organizerName;    // Name of organizer
+    private Date eventDate;          // Date of the event
+    private int entrantCount;
 
     // Timestamps
     @ServerTimestamp
@@ -201,4 +204,28 @@ public class Event {
     public boolean hasHighCancellationRate() {
         return getCancellationRate() > 30.0;
     }
+    public String getOrganizerName() {
+        return organizerName;
+    }
+
+    public void setOrganizerName(String organizerName) {
+        this.organizerName = organizerName;
+    }
+
+    public Date getEventDate() {
+        return eventDate;
+    }
+
+    public void setEventDate(Date eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public int getEntrantCount() {
+        return entrantCount;
+    }
+
+    public void setEntrantCount(int entrantCount) {
+        this.entrantCount = entrantCount;
+    }
+
 }

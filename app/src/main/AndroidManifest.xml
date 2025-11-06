@@ -81,6 +81,11 @@
         <activity
             android:name=".EventDetailsActivity"
             android:exported="false" />
+        <!-- Admin Event Details Activity -->
+        <activity
+            android:name=".admin.AdminEventDetailsActivity"
+            android:exported="false"
+            android:parentActivityName=".admin.AdminBrowseEventsActivity" />
 
         <!-- FileProvider for sharing CSV files -->
         <provider
