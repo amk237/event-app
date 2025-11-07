@@ -44,10 +44,10 @@
         <!-- Entrant Settings Activity -->
         <activity android:name=".SettingsActivity" />
 
-        <!-- Organizer Home Activity -->
-        <activity
-            android:name=".OrganizerHomeActivity"
-            android:exported="false" />
+       <!-- Organizer Home Activity -->
+        <!-- <activity android:name=".OrganizerHomeActivity" android:exported="false" /> -->
+
+
 
         <!-- Admin Home Activity -->
         <activity
