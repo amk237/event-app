@@ -195,7 +195,7 @@ public class ProfileSetupActivity extends AppCompatActivity {
             intent = new Intent(this, com.example.event_app.admin.AdminHomeActivity.class);
         } else if (user.isOrganizer()) {
             Log.d(TAG, "Navigating to OrganizerHomeActivity");
-            intent = new Intent(this, com.example.event_app.OrganizerHomeActivity.class);
+            intent = new Intent(this, com.example.event_app.OrganizerCreateEventActivity.class);
         } else {
             Log.d(TAG, "Navigating to MainActivity (Entrant)");
             intent = new Intent(this, MainActivity.class);
