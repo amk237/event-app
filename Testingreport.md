@@ -92,18 +92,19 @@ public class YourClassTest {
 
 # Problems during testing
 
-## Tests Not Running in CI
+### Tests Not Running in CI
 
 1. **Check Android SDK setup** - Ensure API level matches `compileSdk` in `build.gradle.kts`
 2. **Check JDK version** - Must match `sourceCompatibility` (currently Java 17)
 3. **Check workflow file** - Ensure `.github/workflows/android.yml` exists and is valid YAML
 
-## Tests Failing Locally
+ ### Tests Failing Locally
 
 1. **Android SDK not found**: Set `ANDROID_HOME` environment variable
 2. **Gradle daemon issues**: Run with `--no-daemon` flag
 3. **Dependencies**: Run `./gradlew --refresh-dependencies`
 
+# future implementatuons
 
 1. ** Jacoco implementation
    ```kotlin
