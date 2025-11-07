@@ -23,4 +23,10 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("com.example.event_app", appContext.getPackageName());
     }
+
+    @Test
+    public void testAppContextNotNull() {
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        assertNotNull("App context should not be null", appContext);
+    }
 }
