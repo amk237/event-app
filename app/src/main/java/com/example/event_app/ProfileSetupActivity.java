@@ -53,6 +53,15 @@ public class ProfileSetupActivity extends AppCompatActivity {
         deviceId = getIntent().getStringExtra("deviceId");
         userId = getIntent().getStringExtra("userId");
 
+        // Validate device ID - fallback to ANDROID_ID if not provided
+        if (deviceId == null || deviceId.isEmpty()) {
+            deviceId = android.provider.Settings.Secure.getString(
+                    getContentResolver(),
+                    android.provider.Settings.Secure.ANDROID_ID
+            );
+            Log.w(TAG, "Device ID not provided in intent, using ANDROID_ID: " + deviceId);
+        }
+
         Log.d(TAG, "Device ID: " + deviceId);
         Log.d(TAG, "User ID: " + userId);
 

@@ -121,9 +121,10 @@ public class SettingsActivity extends AppCompatActivity {
         if (auth.getCurrentUser() == null) return;
         String userId = auth.getCurrentUser().getUid();
 
-        String name = etName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
+        // Safe null checks for EditText.getText()
+        String name = etName.getText() != null ? etName.getText().toString().trim() : "";
+        String email = etEmail.getText() != null ? etEmail.getText().toString().trim() : "";
+        String phone = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
 
         if (name.isEmpty() || email.isEmpty()) {
             Toast.makeText(this, "Name and email are required", Toast.LENGTH_SHORT).show();
