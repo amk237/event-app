@@ -1,0 +1,3 @@
+id,uid,name,email,status,selectionTimestamp,confirmationTimestamp,invitationExpiry,cancellationTimestamp
+ENT5001,USR3001,Jordan Rivera,jordan.rivera@example.com,confirmed,2025-02-15T10:00:00Z,2025-02-16T09:30:00Z,2025-02-17T23:59:00Z,
+ENT5002,USR4002,Sam Lee,sam.lee@example.com,pending,2025-02-18T14:00:00Z,,2025-02-20T12:00:00Z,

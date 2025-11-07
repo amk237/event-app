@@ -1,0 +1,3 @@
+eventId,name,description,organizerId,status,posterUrl,location,capacity
+EVT1001,Community Cleanup,Neighborhood cleanup with volunteers,ORG200,active,https://cdn.example.com/posters/cleanup.png,Riverside Park,75
+EVT2002,Tech Expo 2025,Annual technology exposition with demos,ORG450,active,https://cdn.example.com/posters/techexpo.jpg,Convention Center Hall B,350

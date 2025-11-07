@@ -1,0 +1,3 @@
+imageId,imageUrl,uploadedBy,associatedWith,type
+IMG8001,https://cdn.example.com/images/event/cleanup-thumb.png,USR3001,EVT1001,event_poster
+IMG9100,https://cdn.example.com/images/profiles/jordan.png,USR3001,USR3001,profile_picture
