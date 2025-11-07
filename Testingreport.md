@@ -13,11 +13,8 @@
 # COVERAGE 
 ```
 
-## Test Coverage
+##Test Coverage
 
-
-| Component | Test File | Test Methods | Status |
-|-----------|-----------|--------------|--------|
 Result - ResultTest.java : 5 methods Successful
 EntrantsFilter - EntrantsFilterTest.java : 12 methods Successful
 Event - EventTest.java : 13 methods Successful
@@ -26,30 +23,26 @@ Basic Tests - ExampleUnitTest.java
 
 **Total: 37 test methods across 5 test classes**
 
-### Test Details
+##Test Details
 
-#### ResultTest.java
+ResultTest.java
 - Tests success cases (`Result.ok()`)
-- Tests error cases with Throwable
-- Tests error cases with String message
-- Tests null data handling
-- Tests different data types
+- Tests error cases with Throwable and string random
+- Multiple data types
 
-#### EntrantsFilterTest.java
-- Tests all enum values
-- Tests case-insensitive matching
-- Tests whitespace handling
-- Tests null/invalid input handling
+EntrantsFilterTest.java
+- Tests enum values
+- Tests case matching
 
-#### EventTest.java
-- Tests cancellation rate calculations (0%, 50%, 100%, partial)
-- Tests high cancellation rate detection (>30% threshold)
-- Tests edge cases (zero selected, 100% cancellation)
+EventTest.java
+- Tests cancellation rate Computation
+- Tests edge cases 0, 100+
 - Tests constructors
 
-#### UserRoleTest.java
+UserRoleTest.java
 - Tests all role constants
-- Tests non-null and non-empty validation
+
+# thorough Null testing in all 5
 
 
 **Removed `.github/workflows/ant.yml`** - Was trying to build with Ant (not applicable for Android/Gradle project)
