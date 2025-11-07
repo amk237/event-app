@@ -129,7 +129,6 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
         });
     }
 
-    /** --- Firebase Storage: load entrants.json into lists --- */
     private void loadEntrantsFromStorage() {
         entrantsRef.getBytes(MAX_BYTES)
                 .addOnSuccessListener(bytes -> {
@@ -144,13 +143,10 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
                         readArrayIntoList(root.optJSONArray("selected"),   selectedUsers);
                         readArrayIntoList(root.optJSONArray("waitlisted"), waitlistedUsers);
                         readArrayIntoList(root.optJSONArray("cancelled"),  cancelledUsers);
-                    } catch (Exception ignore) {
-                        // keep lists as-is if malformed
-                    }
-                    applyFilter(); // refresh view either way
+                    } catch (Exception ignore) {}
+                    applyFilter();
                 })
                 .addOnFailureListener(err -> {
-                    // If download fails, show empty/current lists
                     applyFilter();
                 });
     }
@@ -163,7 +159,7 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
         }
     }
 
-    /** Persist current lists back to Storage (entrants.json) */
+    /** Persist current lists back to Storage */
     private void saveEntrantsToStorage() {
         try {
             JSONObject root = new JSONObject();
@@ -175,10 +171,8 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
             entrantsRef.putBytes(data)
                     .addOnSuccessListener(task -> applyFilter())
                     .addOnFailureListener(err -> {
-                        // no-op; keep UI as-is
                     });
         } catch (Exception ignore) {
-            // no-op
         }
     }
 
@@ -188,7 +182,7 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
         highlightActiveTab(btnSelected, btnWaitlisted, btnCancelled);
         tvSection.setText("Selected Entrants");
         tvSection.setVisibility(View.VISIBLE);
-        btnTopAction.setVisibility(View.VISIBLE);  // keep visible per your current design
+        btnTopAction.setVisibility(View.VISIBLE);  
         applyFilter();
     }
 
@@ -197,7 +191,7 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
         highlightActiveTab(btnWaitlisted, btnSelected, btnCancelled);
         tvSection.setText("Waitlisted Entrants");
         tvSection.setVisibility(View.VISIBLE);
-        btnTopAction.setVisibility(View.VISIBLE);  // keep visible per your current design
+        btnTopAction.setVisibility(View.VISIBLE);  
         applyFilter();
     }
 
@@ -253,9 +247,8 @@ public class EventEntrantsActivityGskakar extends AppCompatActivity {
         }
     }
 
-    /** ---------------- Draw Replace ---------------- */
     private void drawReplacement() {
-        // Build pool: waitlisted users not already selected/cancelled
+        // Build pool
         List<String> pool = new ArrayList<>();
         for (String u : waitlistedUsers) {
             if (!selectedUsers.contains(u) && !cancelledUsers.contains(u)) {
