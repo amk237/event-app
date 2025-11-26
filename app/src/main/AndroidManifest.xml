@@ -19,7 +19,7 @@
 
         <!-- Splash Screen Activity -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".activites.entrant.SplashActivity"
             android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -31,7 +31,7 @@
 
         <!-- Profile Setup Activity -->
         <activity
-            android:name=".ProfileSetupActivity"
+            android:name=".activites.shared.ProfileSetupActivity"
             android:exported="false" />
 
         <!-- Main Activity (Entrant Home) -->
@@ -46,7 +46,7 @@
 
         <!-- Entrant Settings Activity -->
         <activity
-            android:name=".SettingsActivity"
+            android:name=".activites.entrant.SettingsActivity"
             android:exported="false" />
 
         <!-- Organizer Home Activity -->
@@ -58,12 +58,12 @@
 
         <!-- Organizer: Selected/Confirmed lists + cancel -->
         <activity
-            android:name=".organizer.OrganizerEntrantsListActivity"
+            android:name=".activites.organizer.OrganizerEntrantsListActivity"
             android:exported="false" />
 
         <!-- Browse Events Activity -->
         <activity
-            android:name=".admin.AdminBrowseEventsActivity"
+            android:name=".activites.admin.AdminBrowseEventsActivity"
             android:exported="false"
             android:parentActivityName=".admin.AdminHomeActivity" />
 
@@ -85,15 +85,15 @@
             android:exported="false" />
         <!-- Event Creation Activity -->
         <activity android:name=".OrganizerCreateEventActivity" />
-        <activity android:name=".organizer.CreateEventActivity" />
+        <activity android:name=".activites.organizer.CreateEventActivity" />
 
         <!-- Admin Event Details Activity -->
         <activity
             android:name=".admin.AdminEventDetailsActivity"
             android:exported="false"
-            android:parentActivityName=".admin.AdminBrowseEventsActivity" />
+            android:parentActivityName=".activites.admin.AdminBrowseEventsActivity" />
         <activity
-            android:name=".organizer.EventEntrantsActivityGskakar"
+            android:name=".activites.organizer.EventEntrantsActivityGskakar"
             android:exported="false"
             android:label="Event Entrants" />
 

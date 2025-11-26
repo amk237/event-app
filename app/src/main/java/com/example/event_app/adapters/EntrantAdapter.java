@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.event_app.R;
-import com.example.event_app.organizer.EntrantRow;
+import com.example.event_app.activites.organizer.EntrantRow;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
