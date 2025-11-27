@@ -1,5 +1,6 @@
 package com.example.event_app.activities.admin;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import android.content.Intent;
 
 /**
  * AdminBrowseEventsActivity - Admin can view, search, filter, and sort all events

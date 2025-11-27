@@ -8,4 +8,3 @@ public class UserRole {
     public static final String ORGANIZER = "organizer";
     public static final String ADMIN = "admin";
 }
-

@@ -452,4 +452,3 @@ public class BrowseEventsTabFragment extends Fragment {
         loadAllEvents();
     }
 }
-

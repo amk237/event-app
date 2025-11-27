@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.example.event_app.R;
 import com.example.event_app.models.Event;
+import com.example.event_app.models.GeolocationAudit;
 import com.example.event_app.models.Notification;
 import com.example.event_app.services.NotificationService;
 import com.example.event_app.utils.AccessibilityHelper;
@@ -36,6 +37,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -50,6 +52,8 @@ import java.util.Map;
  * US 01.06.01: View event from QR code
  * US 01.05.04: See total entrants count
  * US 02.02.02: Capture location when joining (for organizer map view)
+ *
+ * UPDATED: Added geolocation audit logging for privacy compliance
  */
 public class EventDetailsActivity extends AppCompatActivity {
 
@@ -447,6 +451,7 @@ public class EventDetailsActivity extends AppCompatActivity {
 
     /**
      * Add user to waiting list with optional location
+     * UPDATED: Now logs geolocation access for privacy compliance audit
      */
     private void addToWaitingList(String userId, Location location) {
         Map<String, Object> updates = new HashMap<>();
@@ -475,6 +480,11 @@ public class EventDetailsActivity extends AppCompatActivity {
                             "Joined waiting list!" + (location != null ? " 📍" : ""),
                             Toast.LENGTH_SHORT).show();
 
+                    // NEW: Log geolocation access for audit (if location was captured)
+                    if (location != null && event.isGeolocationEnabled()) {
+                        logGeolocationAccess(userId, location);
+                    }
+
                     // Send notification
                     notificationService.sendNotification(
                             userId,
@@ -492,6 +502,45 @@ public class EventDetailsActivity extends AppCompatActivity {
                     Log.e(TAG, "❌ Error joining waiting list", e);
                     Toast.makeText(this, "Failed to join waiting list", Toast.LENGTH_SHORT).show();
                     btnJoinWaitingList.setEnabled(true);
+                });
+    }
+
+    /**
+     * NEW: Log geolocation access for privacy compliance audit
+     * Records when and where a user's location was captured for event registration
+     */
+    private void logGeolocationAccess(String userId, Location location) {
+        // Get user name from Firebase Auth (or use userId as fallback)
+        String userName = mAuth.getCurrentUser() != null &&
+                mAuth.getCurrentUser().getDisplayName() != null ?
+                mAuth.getCurrentUser().getDisplayName() : userId;
+
+        // Create audit ID
+        String auditId = db.collection("geolocation_audits").document().getId();
+
+        // Create audit record
+        GeolocationAudit audit = new GeolocationAudit(
+                auditId,
+                userId,
+                userName,
+                eventId,
+                event.getName(),
+                location.getLatitude(),
+                location.getLongitude(),
+                new Date(),
+                "joined_waiting_list"
+        );
+
+        // Save to Firebase
+        db.collection("geolocation_audits")
+                .document(auditId)
+                .set(audit)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "📋 Geolocation access logged for audit (Privacy Compliance)");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "❌ Error logging geolocation audit", e);
+                    // Don't show error to user - this is background logging
                 });
     }
 

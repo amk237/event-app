@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.event_app.R;
+import com.example.event_app.adapters.OrganizerEventsAdapter;
 import com.example.event_app.models.Event;
 import com.example.event_app.utils.AccessibilityHelper;
 import com.google.android.material.button.MaterialButton;

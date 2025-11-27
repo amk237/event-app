@@ -1,6 +1,7 @@
 package com.example.event_app.models;
 
 import com.google.firebase.firestore.ServerTimestamp;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;

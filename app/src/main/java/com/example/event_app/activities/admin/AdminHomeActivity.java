@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,11 +35,16 @@ import java.util.List;
  * - Generate platform reports
  * - Switch back to entrant/organizer view
  * - Flagged content monitoring
+ * - Geolocation audit for privacy compliance
+ * - Notification logs for compliance tracking
+ * - Notification templates management
  *
  * US 03.04.01: Browse events
  * US 03.05.01: Browse profiles
  * US 03.06.01: Browse images
  * US 03.13.01: Export platform usage reports
+ *
+ * UPDATED: Added geolocation audit, notification logs, and notification templates buttons
  */
 public class AdminHomeActivity extends AppCompatActivity {
 
@@ -52,6 +58,8 @@ public class AdminHomeActivity extends AppCompatActivity {
 
     // UI Components - Buttons
     private MaterialButton btnGenerateReports, btnFlaggedItems, btnSwitchToUserMode;
+    private Button btnGeolocationAudit, btnNotificationLogs, btnNotificationTemplates;
+
     private View layoutFlaggedSection;
 
     // Firebase
@@ -109,6 +117,9 @@ public class AdminHomeActivity extends AppCompatActivity {
         btnGenerateReports = findViewById(R.id.btnGenerateReports);
         btnFlaggedItems = findViewById(R.id.btnFlaggedItems);
         btnSwitchToUserMode = findViewById(R.id.btnSwitchToUserMode);
+        btnGeolocationAudit = findViewById(R.id.btnGeolocationAudit);
+        btnNotificationLogs = findViewById(R.id.btnNotificationLogs);
+        btnNotificationTemplates = findViewById(R.id.btnNotificationTemplates);
 
         // Flagged section
         layoutFlaggedSection = findViewById(R.id.layoutFlaggedSection);
@@ -121,21 +132,21 @@ public class AdminHomeActivity extends AppCompatActivity {
         // Browse Events Card
         cardBrowseEvents.setOnClickListener(v -> {
             Log.d(TAG, "Browse Events clicked");
-            Intent intent = new Intent(this, com.example.event_app.activities.admin.AdminBrowseEventsActivity.class);
+            Intent intent = new Intent(this, AdminBrowseEventsActivity.class);
             startActivity(intent);
         });
 
         // Browse Users Card
         cardBrowseUsers.setOnClickListener(v -> {
             Log.d(TAG, "Browse Users clicked");
-            Intent intent = new Intent(this, com.example.event_app.activities.admin.AdminBrowseUsersActivity.class);
+            Intent intent = new Intent(this, AdminBrowseUsersActivity.class);
             startActivity(intent);
         });
 
         // Browse Images Card
         cardBrowseImages.setOnClickListener(v -> {
             Log.d(TAG, "Browse Images clicked");
-            Intent intent = new Intent(this, com.example.event_app.activities.admin.AdminBrowseImagesActivity.class);
+            Intent intent = new Intent(this, AdminBrowseImagesActivity.class);
             startActivity(intent);
         });
 
@@ -147,12 +158,42 @@ public class AdminHomeActivity extends AppCompatActivity {
             });
         }
 
+        // ✨ Geolocation Audit Button
+        if (btnGeolocationAudit != null) {
+            btnGeolocationAudit.setOnClickListener(v -> {
+                Log.d(TAG, "Geolocation Audit clicked");
+                startActivity(new Intent(this, AdminGeolocationAuditActivity.class));
+            });
+        } else {
+            Log.e(TAG, "❌ btnGeolocationAudit is null - check XML layout!");
+        }
+
+        // ✨ Notification Logs Button
+        if (btnNotificationLogs != null) {
+            btnNotificationLogs.setOnClickListener(v -> {
+                Log.d(TAG, "Notification Logs clicked");
+                startActivity(new Intent(this, AdminNotificationLogsActivity.class));
+            });
+        } else {
+            Log.e(TAG, "❌ btnNotificationLogs is null - check XML layout!");
+        }
+
+        // ✨ NEW: Notification Templates Button
+        if (btnNotificationTemplates != null) {
+            btnNotificationTemplates.setOnClickListener(v -> {
+                Log.d(TAG, "Notification Templates clicked");
+                startActivity(new Intent(this, AdminNotificationTemplatesActivity.class));
+            });
+        } else {
+            Log.e(TAG, "❌ btnNotificationTemplates is null - check XML layout!");
+        }
+
         // Flagged Items Button
         if (btnFlaggedItems != null) {
             btnFlaggedItems.setOnClickListener(v -> {
                 Log.d(TAG, "Flagged Items clicked");
                 Toast.makeText(this, "Showing flagged events", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, com.example.event_app.activities.admin.AdminBrowseEventsActivity.class);
+                Intent intent = new Intent(this, AdminBrowseEventsActivity.class);
                 intent.putExtra("showFlaggedOnly", true);
                 startActivity(intent);
             });
