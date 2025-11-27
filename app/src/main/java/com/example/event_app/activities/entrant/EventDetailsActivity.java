@@ -1,4 +1,4 @@
-package com.example.event_app.activites.entrant;
+package com.example.event_app.activities.entrant;
 
 import android.Manifest;
 import android.content.Intent;

@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import com.example.event_app.R;
-import com.example.event_app.activites.admin.AdminBrowseEventsActivity;
+import com.example.event_app.activities.admin.AdminBrowseEventsActivity;
 
 import org.junit.After;
 import org.junit.Before;
