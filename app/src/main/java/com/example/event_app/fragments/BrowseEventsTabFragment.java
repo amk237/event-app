@@ -73,8 +73,6 @@ public class BrowseEventsTabFragment extends Fragment {
     private String currentSearchQuery = "";
     private String currentCategoryFilter = "all";
     private SortOption currentSort = SortOption.DATE_ASC;
-    private List<String> customCategories = new ArrayList<>(); // User-added categories
-    private List<Chip> customCategoryChips = new ArrayList<>(); // Dynamically created chips
 
     // Sort options
     private enum SortOption {
@@ -112,7 +110,6 @@ public class BrowseEventsTabFragment extends Fragment {
         initViews(view);
         setupRecyclerView();
         setupListeners();
-        loadCustomCategories();
         loadAllEvents();
     }
 
@@ -199,14 +196,6 @@ public class BrowseEventsTabFragment extends Fragment {
                 currentCategoryFilter = "Community & Social";
             } else if (checkedId == R.id.chipOther) {
                 currentCategoryFilter = "Other";
-            } else {
-                // Check if it's a custom category chip
-                for (Chip customChip : customCategoryChips) {
-                    if (checkedId == customChip.getId()) {
-                        currentCategoryFilter = customChip.getText().toString();
-                        break;
-                    }
-                }
             }
 
             applyFiltersAndSort();
@@ -214,64 +203,6 @@ public class BrowseEventsTabFragment extends Fragment {
 
         btnSort.setOnClickListener(v -> showSortDialog());
         btnRetry.setOnClickListener(v -> loadAllEvents());
-    }
-
-    /**
-     * Load custom categories from Firestore and add them as chips
-     */
-    private void loadCustomCategories() {
-        db.collection("categories")
-                .orderBy("name")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    customCategories.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String categoryName = doc.getString("name");
-                        if (categoryName != null && !categoryName.trim().isEmpty()) {
-                            customCategories.add(categoryName.trim());
-                        }
-                    }
-                    Log.d(TAG, "Loaded " + customCategories.size() + " custom categories");
-                    addCustomCategoryChips();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading custom categories", e);
-                    // Continue with empty list if loading fails
-                });
-    }
-
-    /**
-     * Dynamically add chips for custom categories
-     */
-    private void addCustomCategoryChips() {
-        // Remove existing custom category chips
-        for (Chip chip : customCategoryChips) {
-            chipGroupFilters.removeView(chip);
-        }
-        customCategoryChips.clear();
-
-        // Hide the "Other" chip since we're replacing it with custom categories
-        if (chipOther != null) {
-            chipOther.setVisibility(View.GONE);
-        }
-
-        // Add new chips for custom categories
-        for (String category : customCategories) {
-            Chip chip = new Chip(requireContext());
-            chip.setId(View.generateViewId());
-            chip.setText(category);
-            chip.setCheckable(true);
-            chip.setClickable(true);
-            
-            // Add click listener
-            chip.setOnClickListener(v -> {
-                currentCategoryFilter = category;
-                applyFiltersAndSort();
-            });
-            
-            chipGroupFilters.addView(chip);
-            customCategoryChips.add(chip);
-        }
     }
 
     private void loadAllEvents() {
@@ -334,11 +265,9 @@ public class BrowseEventsTabFragment extends Fragment {
             String desc = event.getDescription() != null ? event.getDescription().toLowerCase() : "";
             String organizer = event.getOrganizerName() != null ? event.getOrganizerName().toLowerCase() : "";
             String location = event.getLocation() != null ? event.getLocation().toLowerCase() : "";
-            String category = event.getCategory() != null ? event.getCategory().toLowerCase() : "";
 
             if (name.contains(lowerQuery) || desc.contains(lowerQuery) ||
-                    organizer.contains(lowerQuery) || location.contains(lowerQuery) ||
-                    category.contains(lowerQuery)) {
+                    organizer.contains(lowerQuery) || location.contains(lowerQuery)) {
                 result.add(event);
             }
         }
@@ -520,7 +449,6 @@ public class BrowseEventsTabFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        loadCustomCategories(); // Reload custom categories in case new ones were added
         loadAllEvents();
     }
 }
