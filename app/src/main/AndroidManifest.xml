@@ -23,6 +23,14 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDahuyC2u9sFDwPBSs7R0YV1CRgEy-lo4k" />
 
+        <service
+            android:name=".services.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <!-- Splash Activity - LAUNCHER (Entry Point) -->
         <activity
             android:name=".activities.entrant.SplashActivity"
@@ -73,6 +81,17 @@
             android:name=".activities.organizer.ViewEntrantMapActivity"
             android:exported="false"
             android:theme="@style/Theme.LuckySpot" />
+
+        <!-- File Provider for sharing files -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.event_app.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 </manifest>
