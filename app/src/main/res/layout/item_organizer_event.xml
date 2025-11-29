@@ -12,89 +12,115 @@
     app:cardCornerRadius="12dp"
     app:cardBackgroundColor="#FFFFFF">
 
-    <LinearLayout
+    <!-- ✨ NEW: Cancelled Tag Overlay -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
-        <!-- Event Poster -->
-        <ImageView
-            android:id="@+id/ivEventPoster"
-            android:layout_width="100dp"
-            android:layout_height="120dp"
-            android:scaleType="centerCrop"
-            android:background="#F5F5F5"
-            android:contentDescription="Event poster"/>
-
-        <!-- Event Info -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp">
+            android:orientation="horizontal">
 
-            <!-- Event Name -->
-            <TextView
-                android:id="@+id/tvEventName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Event Name"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="2"
-                android:ellipsize="end"/>
+            <!-- Event Poster -->
+            <ImageView
+                android:id="@+id/ivEventPoster"
+                android:layout_width="100dp"
+                android:layout_height="120dp"
+                android:scaleType="centerCrop"
+                android:background="#F5F5F5"
+                android:contentDescription="Event poster"/>
 
-            <!-- Event Date -->
-            <TextView
-                android:id="@+id/tvEventDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Date"
-                android:textColor="#5E5E5E"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
-
-            <!-- Stats -->
+            <!-- Event Info -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp">
+                android:padding="12dp">
 
+                <!-- Event Name -->
                 <TextView
-                    android:id="@+id/tvWaitingCount"
+                    android:id="@+id/tvEventName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0 waiting"
-                    android:textColor="#FFC107"
-                    android:textSize="12sp"
-                    android:textStyle="bold"/>
+                    android:text="Event Name"
+                    android:textColor="#000000"
+                    android:textSize="18sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="2"
+                    android:ellipsize="end"/>
 
+                <!-- Event Date -->
                 <TextView
-                    android:id="@+id/tvSelectedCount"
+                    android:id="@+id/tvEventDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0 selected"
-                    android:textColor="#2196F3"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="2dp"/>
+                    android:text="Date"
+                    android:textColor="#5E5E5E"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp"/>
 
-                <TextView
-                    android:id="@+id/tvAttendingCount"
-                    android:layout_width="wrap_content"
+                <!-- Stats -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="0 attending"
-                    android:textColor="#4CAF50"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="2dp"/>
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp">
+
+                    <TextView
+                        android:id="@+id/tvWaitingCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 waiting"
+                        android:textColor="#FFC107"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/tvSelectedCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 selected"
+                        android:textColor="#2196F3"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp"/>
+
+                    <TextView
+                        android:id="@+id/tvAttendingCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 attending"
+                        android:textColor="#4CAF50"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <!-- ✨ NEW: Cancelled Tag (Top-Right Corner) -->
+        <TextView
+            android:id="@+id/tvCancelledTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:text="❌ CANCELLED"
+            android:textColor="@android:color/white"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-medium"
+            android:background="#E53935"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:elevation="4dp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
 </com.google.android.material.card.MaterialCardView>

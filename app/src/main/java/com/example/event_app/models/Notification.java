@@ -39,6 +39,8 @@ public class Notification {
     public static final String TYPE_WAITLIST_JOINED = "waitlist_joined";
     public static final String TYPE_INVITATION_DECLINED = "invitation_declined";
 
+    public static final String TYPE_EVENT_CANCELLED = "event_cancelled";
+
     // Empty constructor for Firebase
     public Notification() {
     }

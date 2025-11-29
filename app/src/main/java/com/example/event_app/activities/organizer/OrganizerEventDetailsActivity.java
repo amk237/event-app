@@ -18,6 +18,17 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import androidx.core.content.FileProvider;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import com.example.event_app.R;
 import com.example.event_app.activities.organizer.ViewEntrantsActivity;
@@ -291,35 +302,146 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * ✨ UPDATED: Show QR code with Share and Save options
+     */
     private void showQRCode() {
         try {
+            // Generate QR code bitmap
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix bitMatrix = writer.encode(eventId, BarcodeFormat.QR_CODE, 512, 512);
 
             int width = bitMatrix.getWidth();
             int height = bitMatrix.getHeight();
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            final Bitmap qrBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
 
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
-                    bitmap.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+                    qrBitmap.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
                 }
             }
 
-            ImageView imageView = new ImageView(this);
-            imageView.setImageBitmap(bitmap);
-            imageView.setPadding(32, 32, 32, 32);
+            // Inflate custom dialog layout
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_qr_code, null);
 
-            new AlertDialog.Builder(this)
-                    .setTitle("Event QR Code")
-                    .setMessage("Entrants can scan this code to join the event")
-                    .setView(imageView)
-                    .setPositiveButton("Close", null)
-                    .show();
+            // Set QR code image
+            ImageView ivQrCode = dialogView.findViewById(R.id.ivQrCode);
+            ivQrCode.setImageBitmap(qrBitmap);
+
+            // Create dialog
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .create();
+
+            // Setup button listeners
+            MaterialButton btnSave = dialogView.findViewById(R.id.btnSaveQr);
+            MaterialButton btnShare = dialogView.findViewById(R.id.btnShareQr);
+            MaterialButton btnClose = dialogView.findViewById(R.id.btnCloseQr);
+
+            btnSave.setOnClickListener(v -> {
+                saveQrCodeToGallery(qrBitmap);
+            });
+
+            btnShare.setOnClickListener(v -> {
+                shareQrCode(qrBitmap);
+            });
+
+            btnClose.setOnClickListener(v -> dialog.dismiss());
+
+            dialog.show();
 
         } catch (WriterException e) {
             Log.e(TAG, "Error generating QR code", e);
             Toast.makeText(this, "Failed to generate QR code", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * ✨ NEW: Save QR code to device gallery
+     */
+    private void saveQrCodeToGallery(Bitmap qrBitmap) {
+        try {
+            String fileName = event.getName().replaceAll("[^a-zA-Z0-9]", "_") + "_QR.png";
+
+            // For Android 10+ (API 29+)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LuckySpot");
+
+                Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                if (uri != null) {
+                    OutputStream outputStream = getContentResolver().openOutputStream(uri);
+                    if (outputStream != null) {
+                        qrBitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+                        outputStream.close();
+                        Toast.makeText(this, "✅ QR code saved to gallery!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } else {
+                // For older Android versions
+                String imagesDir = Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES).toString() + "/LuckySpot";
+                File dir = new File(imagesDir);
+                if (!dir.exists()) {
+                    dir.mkdirs();
+                }
+
+                File file = new File(dir, fileName);
+                FileOutputStream fos = new FileOutputStream(file);
+                qrBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                fos.close();
+
+                // Notify gallery
+                Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                mediaScanIntent.setData(Uri.fromFile(file));
+                sendBroadcast(mediaScanIntent);
+
+                Toast.makeText(this, "✅ QR code saved to gallery!", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error saving QR code", e);
+            Toast.makeText(this, "❌ Failed to save QR code", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * ✨ NEW: Share QR code via other apps
+     */
+    private void shareQrCode(Bitmap qrBitmap) {
+        try {
+            // Save to cache directory first
+            File cachePath = new File(getCacheDir(), "qr_codes");
+            cachePath.mkdirs();
+
+            String fileName = event.getName().replaceAll("[^a-zA-Z0-9]", "_") + "_QR.png";
+            File file = new File(cachePath, fileName);
+
+            FileOutputStream stream = new FileOutputStream(file);
+            qrBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            stream.close();
+
+            // Get URI using FileProvider
+            Uri contentUri = FileProvider.getUriForFile(
+                    this,
+                    "com.example.event_app.fileprovider",
+                    file
+            );
+
+            // Create share intent
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("image/png");
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+            shareIntent.putExtra(Intent.EXTRA_TEXT,
+                    "Join \"" + event.getName() + "\" by scanning this QR code!");
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            startActivity(Intent.createChooser(shareIntent, "Share QR Code"));
+
+        } catch (IOException e) {
+            Log.e(TAG, "Error sharing QR code", e);
+            Toast.makeText(this, "Failed to share QR code", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -825,20 +947,74 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * ✨ UPDATED: Cancel event and notify all entrants
+     */
     private void cancelEvent() {
         btnCancelEvent.setEnabled(false);
 
         db.collection("events").document(eventId)
-                .update("status", "cancelled")
+                .update(
+                        "status", "cancelled",
+                        "cancelledAt", System.currentTimeMillis()  // ✨ Track when
+                )
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Event cancelled", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "✅ Event cancelled");
+
+                    // ✨ NEW: Notify all entrants
+                    notifyEntrantsOfCancellation();
+
+                    Toast.makeText(this,
+                            "Event cancelled. All entrants will be notified.",
+                            Toast.LENGTH_LONG).show();
                     finish();
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error cancelling event", e);
+                    Log.e(TAG, "❌ Error cancelling event", e);
                     Toast.makeText(this, "Failed to cancel event", Toast.LENGTH_SHORT).show();
                     btnCancelEvent.setEnabled(true);
                 });
+    }
+
+    /**
+     * ✨ NEW: Notify all entrants that event is cancelled
+     */
+    private void notifyEntrantsOfCancellation() {
+        List<String> allEntrants = new ArrayList<>();
+
+        // Collect all entrants (waiting, selected, attending)
+        if (event.getWaitingList() != null) {
+            allEntrants.addAll(event.getWaitingList());
+        }
+        if (event.getSelectedList() != null) {
+            allEntrants.addAll(event.getSelectedList());
+        }
+        if (event.getSignedUpUsers() != null) {
+            allEntrants.addAll(event.getSignedUpUsers());
+        }
+
+        // Remove duplicates using Set
+        List<String> uniqueEntrants = new ArrayList<>(new java.util.HashSet<>(allEntrants));
+
+        if (uniqueEntrants.isEmpty()) {
+            Log.d(TAG, "No entrants to notify");
+            return;
+        }
+
+        // Send cancellation notifications
+        notificationService.sendBulkNotifications(
+                uniqueEntrants,
+                eventId,
+                event.getName(),
+                "event_cancelled",  // Or use Notification.TYPE_EVENT_CANCELLED
+                "❌ Event Cancelled",
+                "Unfortunately, \"" + event.getName() +
+                        "\" has been cancelled by the organizer. We apologize for any inconvenience.",
+                (successCount, failureCount) -> {
+                    Log.d(TAG, "📧 Sent cancellation notification to " +
+                            successCount + " entrants");
+                }
+        );
     }
 
     private String capitalizeFirst(String str) {

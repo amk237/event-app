@@ -64,6 +64,7 @@ public class OrganizerEventsAdapter extends RecyclerView.Adapter<OrganizerEvents
         MaterialCardView cardEvent;
         ImageView ivPoster;
         TextView tvEventName, tvDate, tvWaitingCount, tvSelectedCount, tvAttendingCount;
+        TextView tvCancelledTag;
 
         public EventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +75,7 @@ public class OrganizerEventsAdapter extends RecyclerView.Adapter<OrganizerEvents
             tvWaitingCount = itemView.findViewById(R.id.tvWaitingCount);
             tvSelectedCount = itemView.findViewById(R.id.tvSelectedCount);
             tvAttendingCount = itemView.findViewById(R.id.tvAttendingCount);
+            tvCancelledTag = itemView.findViewById(R.id.tvCancelledTag);
         }
 
         public void bind(Event event) {
@@ -106,7 +108,17 @@ public class OrganizerEventsAdapter extends RecyclerView.Adapter<OrganizerEvents
                 ivPoster.setImageResource(R.drawable.ic_event_placeholder);
             }
 
-            // ✅ FIXED: Click listener - navigate to DETAILS screen, not list screen
+            // ✨ NEW: Show cancelled tag if event is cancelled
+            if ("cancelled".equals(event.getStatus())) {
+                tvCancelledTag.setVisibility(View.VISIBLE);
+                // Gray out the card
+                cardEvent.setAlpha(0.6f);
+            } else {
+                tvCancelledTag.setVisibility(View.GONE);
+                cardEvent.setAlpha(1.0f);
+            }
+
+            // Click listener
             cardEvent.setOnClickListener(v -> {
                 Log.d("OrganizerAdapter", "Opening details for event: " + event.getId());
                 Intent intent = new Intent(context, OrganizerEventDetailsActivity.class);
