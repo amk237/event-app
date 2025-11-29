@@ -75,7 +75,7 @@
                 android:text="You have been selected for the event!"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="14sp"
-                android:maxLines="2"
+                android:maxLines="6"
                 android:ellipsize="end"/>
 
             <!-- Event Name -->
