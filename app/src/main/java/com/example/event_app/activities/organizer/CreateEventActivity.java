@@ -10,6 +10,7 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -39,8 +40,14 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * CreateEventActivity - Create new events with geolocation toggle
@@ -72,7 +79,8 @@ public class CreateEventActivity extends AppCompatActivity {
     private Uri posterUri;
     private Date eventDate, regStartDate, regEndDate;
     private boolean geolocationEnabled = false;
-    private String selectedCategory = "Other"; // Default category
+    private String selectedCategory = "Food & Dining"; // Default category
+    private List<String> customCategories = new ArrayList<>(); // User-added categories
 
     // Image picker launcher
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
@@ -96,6 +104,9 @@ public class CreateEventActivity extends AppCompatActivity {
 
         // Initialize views
         initViews();
+
+        // Load custom categories from Firestore
+        loadCustomCategories();
     }
 
     private void initViews() {
@@ -157,26 +168,58 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Show category selection dialog
+     * Load custom categories from Firestore
+     */
+    private void loadCustomCategories() {
+        db.collection("categories")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    customCategories.clear();
+                    for (com.google.firebase.firestore.QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String categoryName = doc.getString("name");
+                        if (categoryName != null && !categoryName.trim().isEmpty()) {
+                            customCategories.add(categoryName.trim());
+                        }
+                    }
+                    // Sort alphabetically
+                    Collections.sort(customCategories);
+                    Log.d(TAG, "Loaded " + customCategories.size() + " custom categories");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading custom categories", e);
+                    // Continue with empty list if loading fails
+                });
+    }
+
+    /**
+     * Show category selection dialog with predefined and custom categories
      */
     private void showCategoryDialog() {
-        String[] categories = {
-                "Food & Dining",
-                "Sports & Fitness",
-                "Music & Entertainment",
-                "Education & Learning",
-                "Art & Culture",
-                "Technology",
-                "Health & Wellness",
-                "Business & Networking",
-                "Community & Social",
-                "Other"
-        };
+        // Predefined categories
+        List<String> predefinedCategories = new ArrayList<>();
+        predefinedCategories.add("Food & Dining");
+        predefinedCategories.add("Sports & Fitness");
+        predefinedCategories.add("Music & Entertainment");
+        predefinedCategories.add("Education & Learning");
+        predefinedCategories.add("Art & Culture");
+        predefinedCategories.add("Technology");
+        predefinedCategories.add("Health & Wellness");
+        predefinedCategories.add("Business & Networking");
+        predefinedCategories.add("Community & Social");
+
+        // Combine predefined and custom categories
+        List<String> allCategories = new ArrayList<>(predefinedCategories);
+        allCategories.addAll(customCategories);
+
+        // Add "Add New Category"
+        allCategories.add("+ Add New Category");
+
+        String[] categoriesArray = allCategories.toArray(new String[0]);
 
         // Find currently selected index
-        int selectedIndex = 9; // Default to "Other"
-        for (int i = 0; i < categories.length; i++) {
-            if (categories[i].equals(selectedCategory)) {
+        int selectedIndex = 0; // Default to first category
+        for (int i = 0; i < categoriesArray.length; i++) {
+            if (categoriesArray[i].equals(selectedCategory)) {
                 selectedIndex = i;
                 break;
             }
@@ -184,13 +227,113 @@ public class CreateEventActivity extends AppCompatActivity {
 
         new AlertDialog.Builder(this)
                 .setTitle("Select Event Category")
-                .setSingleChoiceItems(categories, selectedIndex, (dialog, which) -> {
-                    selectedCategory = categories[which];
-                    btnSelectCategory.setText(selectedCategory);
-                    dialog.dismiss();
+                .setSingleChoiceItems(categoriesArray, selectedIndex, (dialog, which) -> {
+                    String selected = categoriesArray[which];
+
+                    // Check if user wants to add a new category
+                    if (selected.equals("+ Add New Category")) {
+                        dialog.dismiss();
+                        showAddCategoryDialog();
+                    } else {
+                        selectedCategory = selected;
+                        btnSelectCategory.setText(selectedCategory);
+                        dialog.dismiss();
+                    }
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    /**
+     * Show dialog to add a new custom category
+     */
+    private void showAddCategoryDialog() {
+        EditText input = new EditText(this);
+        input.setHint("Enter category name");
+        input.setMaxLines(1);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Add New Category")
+                .setView(input)
+                .setPositiveButton("Add", (dialog, which) -> {
+                    String categoryName = input.getText().toString().trim();
+                    if (!TextUtils.isEmpty(categoryName)) {
+                        addCustomCategory(categoryName);
+                    } else {
+                        Toast.makeText(this, "Category name cannot be empty", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    /**
+     * Add a new custom category to Firestore
+     */
+    private void addCustomCategory(String categoryName) {
+        // Check if category already exists
+        if (customCategories.contains(categoryName)) {
+            Toast.makeText(this, "Category already exists", Toast.LENGTH_SHORT).show();
+            selectedCategory = categoryName;
+            btnSelectCategory.setText(selectedCategory);
+            return;
+        }
+
+        // Check if it's a predefined category
+        List<String> predefinedCategories = new ArrayList<>();
+        predefinedCategories.add("Food & Dining");
+        predefinedCategories.add("Sports & Fitness");
+        predefinedCategories.add("Music & Entertainment");
+        predefinedCategories.add("Education & Learning");
+        predefinedCategories.add("Art & Culture");
+        predefinedCategories.add("Technology");
+        predefinedCategories.add("Health & Wellness");
+        predefinedCategories.add("Business & Networking");
+        predefinedCategories.add("Community & Social");
+
+        if (predefinedCategories.contains(categoryName)) {
+            Toast.makeText(this, "This is a predefined category", Toast.LENGTH_SHORT).show();
+            selectedCategory = categoryName;
+            btnSelectCategory.setText(selectedCategory);
+            return;
+        }
+
+        // Add to Firestore
+        Map<String, Object> categoryData = new HashMap<>();
+        categoryData.put("name", categoryName);
+        categoryData.put("createdAt", System.currentTimeMillis());
+
+        // Generate a safe document ID (remove special characters, keep only alphanumeric and underscores)
+        String docId = categoryName.toLowerCase()
+                .replaceAll("[^a-z0-9_]", "_")  // Replace non-alphanumeric with underscore
+                .replaceAll("_+", "_")          // Replace multiple underscores with single
+                .replaceAll("^_|_$", "");      // Remove leading/trailing underscores
+
+        // If docId is empty after cleaning, use a generated ID
+        if (docId.isEmpty()) {
+            docId = db.collection("categories").document().getId();
+        }
+
+        db.collection("categories")
+                .document(docId)
+                .set(categoryData)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Custom category added: " + categoryName);
+                    customCategories.add(categoryName);
+                    Collections.sort(customCategories);
+                    selectedCategory = categoryName;
+                    btnSelectCategory.setText(selectedCategory);
+                    Toast.makeText(this, "Category added successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error adding custom category", e);
+                    String errorMsg = e.getMessage();
+                    if (errorMsg != null && errorMsg.contains("PERMISSION_DENIED")) {
+                        Toast.makeText(this, "Permission denied. Please check Firestore rules.", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "Failed to add category: " + (errorMsg != null ? errorMsg : "Unknown error"), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     /**
@@ -354,9 +497,9 @@ public class CreateEventActivity extends AppCompatActivity {
 
                     // Upload poster if selected
                     if (posterUri != null) {
-                        uploadPosterAndCreateEvent(eventId, event);
+                        uploadPosterAndCreateEvent(eventId, event, name);
                     } else {
-                        saveEventToFirestore(eventId, event);
+                        saveEventToFirestore(eventId, event, name);
                     }
                 });
     }
@@ -385,7 +528,7 @@ public class CreateEventActivity extends AppCompatActivity {
     /**
      * Upload poster to Firebase Storage
      */
-    private void uploadPosterAndCreateEvent(String eventId, Event event) {
+    private void uploadPosterAndCreateEvent(String eventId, Event event, String eventName) {
         StorageReference posterRef = storage.getReference()
                 .child("event_posters")
                 .child(eventId + ".jpg");
@@ -395,27 +538,27 @@ public class CreateEventActivity extends AppCompatActivity {
                     // Get download URL
                     posterRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         event.setPosterUrl(uri.toString());
-                        saveEventToFirestore(eventId, event);
+                        saveEventToFirestore(eventId, event, eventName);
                     });
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error uploading poster", e);
                     Toast.makeText(this, "Failed to upload poster, creating event without it", Toast.LENGTH_SHORT).show();
-                    saveEventToFirestore(eventId, event);
+                    saveEventToFirestore(eventId, event, eventName);
                 });
     }
 
     /**
      * Save event to Firestore and generate QR code
      */
-    private void saveEventToFirestore(String eventId, Event event) {
+    private void saveEventToFirestore(String eventId, Event event, String eventName) {
         db.collection("events").document(eventId)
                 .set(event)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "âœ… Event created successfully");
 
                     // Generate and upload QR code
-                    generateAndUploadQRCode(eventId);
+                    generateAndUploadQRCode(eventId, eventName);
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "âŒ Error creating event", e);
@@ -427,7 +570,7 @@ public class CreateEventActivity extends AppCompatActivity {
     /**
      * US 02.01.01: Generate QR code for event
      */
-    private void generateAndUploadQRCode(String eventId) {
+    private void generateAndUploadQRCode(String eventId, String eventName) {
         try {
             // Generate QR code bitmap
             QRCodeWriter writer = new QRCodeWriter();
@@ -457,28 +600,28 @@ public class CreateEventActivity extends AppCompatActivity {
                     .addOnSuccessListener(taskSnapshot -> {
                         Log.d(TAG, "âœ… QR code uploaded");
                         hideLoading();
-                        showSuccessAndNavigate();
+                        showSuccessAndNavigate(eventId, eventName);
                     })
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "âŒ Error uploading QR code", e);
                         hideLoading();
                         // Still show success even if QR upload fails
-                        showSuccessAndNavigate();
+                        showSuccessAndNavigate(eventId, eventName);
                     });
 
         } catch (WriterException e) {
             Log.e(TAG, "Error generating QR code", e);
             hideLoading();
-            showSuccessAndNavigate();
+            // Still navigate to QR code display
+            showSuccessAndNavigate(eventId, eventName);
         }
     }
 
-    private void showSuccessAndNavigate() {
-        Toast.makeText(this, "Event created successfully! ðŸŽ‰", Toast.LENGTH_LONG).show();
-
-        // Go back to main activity
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    private void showSuccessAndNavigate(String eventId, String eventName) {
+        // Navigate to QR code display activity
+        Intent intent = new Intent(this, QRCodeDisplayActivity.class);
+        intent.putExtra("eventId", eventId);
+        intent.putExtra("eventName", eventName);
         startActivity(intent);
         finish();
     }

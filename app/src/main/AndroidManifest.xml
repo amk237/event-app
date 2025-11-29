@@ -58,6 +58,7 @@
         <!-- Organizer Activities -->
         <activity android:name=".activities.organizer.OrganizerEventDetailsActivity" />
         <activity android:name=".activities.organizer.CreateEventActivity" />
+        <activity android:name=".activities.organizer.QRCodeDisplayActivity" />
         <activity android:name=".activities.organizer.OrganizerEventsActivity" />
         <activity android:name=".activities.organizer.ViewEntrantsActivity" />
 
@@ -82,10 +83,10 @@
             android:exported="false"
             android:theme="@style/Theme.LuckySpot" />
 
-        <!-- File Provider for sharing files -->
+        <!-- FileProvider for sharing files -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.example.event_app.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
