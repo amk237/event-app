@@ -20,6 +20,10 @@ import com.example.event_app.services.NotificationService;
 import com.example.event_app.utils.AccessibilityHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +31,10 @@ import java.util.List;
 /**
  * NotificationsActivity - View all notifications
  *
+ * ✨ UPDATED: Added real-time Firestore listener for instant notification updates!
+ *
  * Features:
- * - View all notifications
+ * - View all notifications (REAL-TIME updates! ⚡)
  * - Mark as read
  * - Delete notifications
  * - Navigate to related events
@@ -52,6 +58,10 @@ public class NotificationsActivity extends AppCompatActivity {
     private NotificationService notificationService;
     private List<Notification> notifications;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
+    // ✨ NEW: Firestore listener for real-time updates
+    private ListenerRegistration notificationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +71,7 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         notificationService = new NotificationService();
         notifications = new ArrayList<>();
 
@@ -69,8 +80,8 @@ public class NotificationsActivity extends AppCompatActivity {
         setupRecyclerView();
         setupListeners();
 
-        // Load notifications
-        loadNotifications();
+        // ✨ NEW: Load notifications with real-time listener
+        startRealtimeNotificationListener();
     }
 
     private void initViews() {
@@ -113,6 +124,55 @@ public class NotificationsActivity extends AppCompatActivity {
         btnClearAll.setOnClickListener(v -> showClearAllConfirmation());
     }
 
+    /**
+     * ✨ NEW: Real-time Firestore listener for instant notification updates!
+     * Notifications appear IMMEDIATELY when sent - no refresh needed!
+     */
+    private void startRealtimeNotificationListener() {
+        String userId = mAuth.getCurrentUser().getUid();
+
+        showLoading();
+
+        // ✨ CRITICAL: addSnapshotListener() for real-time updates
+        notificationListener = db.collection("notifications")
+                .whereEqualTo("userId", userId)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "❌ Error listening to notifications", error);
+                        showEmpty();
+                        return;
+                    }
+
+                    if (snapshots == null || snapshots.isEmpty()) {
+                        Log.d(TAG, "No notifications");
+                        notifications.clear();
+                        showEmpty();
+                        adapter.notifyDataSetChanged();
+                        updateButtonStates();
+                        return;
+                    }
+
+                    // ✨ Update list in real-time!
+                    notifications.clear();
+
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        Notification notification = doc.toObject(Notification.class);
+                        notification.setNotificationId(doc.getId());
+                        notifications.add(notification);
+                    }
+
+                    Log.d(TAG, "✅ Loaded " + notifications.size() + " notifications (real-time)");
+
+                    showNotifications();
+                    adapter.notifyDataSetChanged();
+                    updateButtonStates();
+                });
+    }
+
+    /**
+     * OLD: One-time load (not needed anymore, but keeping for reference)
+     */
     private void loadNotifications() {
         showLoading();
 
@@ -272,9 +332,28 @@ public class NotificationsActivity extends AppCompatActivity {
         emptyView.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * ✨ CRITICAL: Remove listener when activity is destroyed
+     * Prevents memory leaks and unnecessary battery drain!
+     */
     @Override
-    protected void onResume() {
-        super.onResume();
-        loadNotifications();
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Remove listener to prevent memory leaks
+        if (notificationListener != null) {
+            notificationListener.remove();
+            Log.d(TAG, "🔌 Real-time listener removed");
+        }
     }
+
+    /**
+     * ✨ REMOVED: onResume() reload
+     * Not needed anymore because real-time listener handles updates automatically!
+     */
+    // @Override
+    // protected void onResume() {
+    //     super.onResume();
+    //     loadNotifications();  // ← No longer needed!
+    // }
 }
