@@ -296,7 +296,7 @@ public class CreateEventActivity extends AppCompatActivity {
 
     /**
      * US 02.01.01: Create event and generate QR code
-     * US 02.02.03: Enable/disable geolocation
+     * US 02.02.03: Enable/disable geolocations
      */
     private void createEvent() {
         // Get values
