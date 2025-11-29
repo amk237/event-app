@@ -67,7 +67,6 @@ public class HomeFragment extends Fragment {
     private MaterialCardView cardScanQr;
     private ImageButton btnSearch, btnNotifications;
     private TextView tvNotificationBadge; // ✨ Badge showing count
-    private TextView btnSeeAllHappeningSoon, btnSeeAllPopular;
     private RecyclerView rvHappeningSoon, rvPopular;
     private LinearLayout emptyHappeningSoon, emptyPopular;
     private MaterialButton btnMyEvents, btnCreateEvent;
@@ -160,8 +159,6 @@ public class HomeFragment extends Fragment {
         btnNotifications = view.findViewById(R.id.btnNotifications);
         tvNotificationBadge = view.findViewById(R.id.tvNotificationBadge); // ✨ Badge
 
-        btnSeeAllHappeningSoon = view.findViewById(R.id.btnSeeAllHappeningSoon);
-        btnSeeAllPopular = view.findViewById(R.id.btnSeeAllPopular);
         rvHappeningSoon = view.findViewById(R.id.rvHappeningSoon);
         rvPopular = view.findViewById(R.id.rvPopular);
         emptyHappeningSoon = view.findViewById(R.id.emptyHappeningSoon);
@@ -221,15 +218,7 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        btnSeeAllHappeningSoon.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), BrowseEventsActivity.class);
-            startActivity(intent);
-        });
 
-        btnSeeAllPopular.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), BrowseEventsActivity.class);
-            startActivity(intent);
-        });
 
         // ✨ NEW: See All Favorites
         if (btnSeeAllFavorites != null) {
