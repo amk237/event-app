@@ -93,6 +93,9 @@ public class HomeFragment extends Fragment {
     // ✨ Real-time badge listener
     private ListenerRegistration badgeListener;
 
+    // ✨ NEW: Real-time favorites listener
+    private ListenerRegistration favoritesListener;
+
     // Permission launcher for camera
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
@@ -389,7 +392,7 @@ public class HomeFragment extends Fragment {
     }
 
     /**
-     * ✨ NEW: Load user's favorite events
+     * ✨ UPDATED: Load user's favorite events with REAL-TIME updates
      */
     private void loadFavoriteEvents() {
         if (mAuth.getCurrentUser() == null) {
@@ -398,18 +401,29 @@ public class HomeFragment extends Fragment {
         }
 
         String userId = mAuth.getCurrentUser().getUid();
-        Log.d(TAG, "Loading favorite events for user: " + userId);
+        Log.d(TAG, "Setting up real-time favorites listener for user: " + userId);
 
-        db.collection("users").document(userId)
-                .get()
-                .addOnSuccessListener(document -> {
-                    if (!document.exists()) {
+        // ✨ Remove old listener if exists
+        if (favoritesListener != null) {
+            favoritesListener.remove();
+        }
+
+        // ✨ Set up real-time listener (like Instagram!)
+        favoritesListener = db.collection("users").document(userId)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to favorites", error);
+                        hideFavoritesSection();
+                        return;
+                    }
+
+                    if (snapshot == null || !snapshot.exists()) {
                         Log.d(TAG, "User document doesn't exist");
                         hideFavoritesSection();
                         return;
                     }
 
-                    List<String> favoriteIds = (List<String>) document.get("favoriteEvents");
+                    List<String> favoriteIds = (List<String>) snapshot.get("favoriteEvents");
 
                     if (favoriteIds == null || favoriteIds.isEmpty()) {
                         Log.d(TAG, "No favorite events");
@@ -417,7 +431,7 @@ public class HomeFragment extends Fragment {
                         return;
                     }
 
-                    Log.d(TAG, "Found " + favoriteIds.size() + " favorite events");
+                    Log.d(TAG, "📬 Real-time favorites update: " + favoriteIds.size() + " favorites");
 
                     // Firestore whereIn has a limit of 10 items
                     if (favoriteIds.size() > 10) {
@@ -436,7 +450,7 @@ public class HomeFragment extends Fragment {
                                     events.add(event);
                                 }
 
-                                Log.d(TAG, "Loaded " + events.size() + " favorite events from Firestore");
+                                Log.d(TAG, "✨ Instantly updated: " + events.size() + " favorite events");
 
                                 if (events.isEmpty()) {
                                     hideFavoritesSection();
@@ -449,10 +463,6 @@ public class HomeFragment extends Fragment {
                                 Log.e(TAG, "Error loading favorites", e);
                                 hideFavoritesSection();
                             });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading user favorites", e);
-                    hideFavoritesSection();
                 });
     }
 
@@ -495,9 +505,6 @@ public class HomeFragment extends Fragment {
         super.onResume();
         loadHappeningSoonEvents();
         loadPopularEvents();
-        loadFavoriteEvents();  // ✨ NEW: Load favorites
-
-        // ✨ Refresh badge when returning to home (listener handles real-time updates)
         updateNotificationBadge();
     }
 
@@ -505,10 +512,16 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        // ✨ Clean up real-time listener
+        // ✨ Clean up real-time listeners
         if (badgeListener != null) {
             badgeListener.remove();
             badgeListener = null;
+        }
+
+        // ✨ NEW: Clean up favorites listener
+        if (favoritesListener != null) {
+            favoritesListener.remove();
+            favoritesListener = null;
         }
     }
 }

@@ -171,6 +171,7 @@ public class EventDetailsActivity extends AppCompatActivity {
                         event = document.toObject(Event.class);
                         if (event != null) {
                             event.setId(document.getId());
+                            checkIfOrganizer();
                             displayEventDetails();
                             checkUserStatus();
                         }
@@ -183,6 +184,8 @@ public class EventDetailsActivity extends AppCompatActivity {
                     showError("Failed to load event");
                 });
     }
+
+
 
     private void displayEventDetails() {
         tvEventName.setText(event.getName());
@@ -225,6 +228,30 @@ public class EventDetailsActivity extends AppCompatActivity {
         }
 
         showContent();
+    }
+
+    /**
+     * ✨ FIX #4: Check if current user is organizer and auto-redirect
+     * Organizers shouldn't see the entrant view - redirect to management
+     */
+    private void checkIfOrganizer() {
+        if (mAuth.getCurrentUser() == null || event == null) {
+            return;
+        }
+
+        String currentUserId = mAuth.getCurrentUser().getUid();
+        String organizerId = event.getOrganizerId();
+
+        if (currentUserId.equals(organizerId)) {
+            // User IS the organizer - redirect to management view
+            Log.d(TAG, "✅ User is organizer - redirecting to OrganizerEventDetailsActivity");
+
+            Intent intent = new Intent(this, com.example.event_app.activities.organizer.OrganizerEventDetailsActivity.class);
+            intent.putExtra("EVENT_ID", eventId);
+            startActivity(intent);
+            finish();  // Close this activity so back button doesn't return here
+        }
+        // If not organizer, do nothing - continue showing entrant view
     }
 
     private void openLocationInMaps() {
