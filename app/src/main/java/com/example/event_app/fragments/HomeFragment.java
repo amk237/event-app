@@ -78,8 +78,6 @@ public class HomeFragment extends Fragment {
     private LinearLayout emptyFavorites, sectionFavorites;
     private HorizontalEventAdapter favoritesAdapter;
 
-    // Category chips
-    private Chip chipMusic, chipSports, chipArt, chipFood, chipTech, chipWorkshops, chipOther;
 
     // Adapters
     private HorizontalEventAdapter happeningSoonAdapter;
@@ -172,15 +170,6 @@ public class HomeFragment extends Fragment {
         rvFavorites = view.findViewById(R.id.rvFavorites);
         emptyFavorites = view.findViewById(R.id.emptyFavorites);
         sectionFavorites = view.findViewById(R.id.sectionFavorites);
-
-        // Category chips
-        chipMusic = view.findViewById(R.id.chipMusic);
-        chipSports = view.findViewById(R.id.chipSports);
-        chipArt = view.findViewById(R.id.chipArt);
-        chipFood = view.findViewById(R.id.chipFood);
-        chipTech = view.findViewById(R.id.chipTech);
-        chipWorkshops = view.findViewById(R.id.chipWorkshops);
-        chipOther = view.findViewById(R.id.chipOther);
     }
 
     private void setupRecyclerViews() {
@@ -240,35 +229,7 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-        setupCategoryChips();
     }
-
-    private void setupCategoryChips() {
-        View.OnClickListener categoryListener = v -> {
-            Intent intent = new Intent(requireContext(), BrowseEventsActivity.class);
-
-            String category = "";
-            if (v.getId() == R.id.chipMusic) category = "Music";
-            else if (v.getId() == R.id.chipSports) category = "Sports";
-            else if (v.getId() == R.id.chipArt) category = "Art";
-            else if (v.getId() == R.id.chipFood) category = "Food";
-            else if (v.getId() == R.id.chipTech) category = "Tech";
-            else if (v.getId() == R.id.chipWorkshops) category = "Workshops";
-            else if (v.getId() == R.id.chipOther) category = "Other";
-
-            intent.putExtra("CATEGORY_FILTER", category);
-            startActivity(intent);
-        };
-
-        chipMusic.setOnClickListener(categoryListener);
-        chipSports.setOnClickListener(categoryListener);
-        chipArt.setOnClickListener(categoryListener);
-        chipFood.setOnClickListener(categoryListener);
-        chipTech.setOnClickListener(categoryListener);
-        chipWorkshops.setOnClickListener(categoryListener);
-        chipOther.setOnClickListener(categoryListener);
-    }
-
     /**
      * ✨ UPDATED: Real-time notification badge - Updates instantly like Instagram!
      */
