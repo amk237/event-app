@@ -53,6 +53,9 @@ public class MyOrganizedEventsTabFragment extends Fragment {
     private FirebaseAuth mAuth;
     private List<Event> myEvents;
 
+    // ✨ Real-time listener for organizer's events
+    private com.google.firebase.firestore.ListenerRegistration eventsListener;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -103,6 +106,10 @@ public class MyOrganizedEventsTabFragment extends Fragment {
         });
     }
 
+    /**
+     * ✨ UPDATED: Real-time updates for organizer's events
+     * New events appear instantly when created!
+     */
     private void loadMyOrganizedEvents() {
         if (mAuth.getCurrentUser() == null) {
             Log.e(TAG, "No user is currently signed in");
@@ -113,11 +120,27 @@ public class MyOrganizedEventsTabFragment extends Fragment {
         String userId = mAuth.getCurrentUser().getUid();
         showLoading();
 
-        db.collection("events")
+        // Remove old listener if exists
+        if (eventsListener != null) {
+            eventsListener.remove();
+        }
+
+        // ✨ Real-time listener - Updates automatically when events are created/modified!
+        eventsListener = db.collection("events")
                 .whereEqualTo("organizerId", userId)
                 .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to organized events", error);
+                        showEmpty("Failed to load events. Please try again.");
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots == null) {
+                        showEmpty("You haven't organized any events yet");
+                        return;
+                    }
+
                     myEvents.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
@@ -125,7 +148,7 @@ public class MyOrganizedEventsTabFragment extends Fragment {
                         myEvents.add(event);
                     }
 
-                    Log.d(TAG, "Loaded " + myEvents.size() + " organized events");
+                    Log.d(TAG, "⚡ Real-time update: " + myEvents.size() + " organized events");
 
                     if (myEvents.isEmpty()) {
                         showEmpty("You haven't organized any events yet");
@@ -133,10 +156,6 @@ public class MyOrganizedEventsTabFragment extends Fragment {
                         showEvents();
                         adapter.setEvents(myEvents);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading organized events", e);
-                    showEmpty("Failed to load events. Please try again.");
                 });
     }
 
@@ -160,9 +179,14 @@ public class MyOrganizedEventsTabFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        // Reload events when returning to this tab
-        loadMyOrganizedEvents();
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // ✨ Clean up real-time listener to prevent memory leaks
+        if (eventsListener != null) {
+            eventsListener.remove();
+            eventsListener = null;
+            Log.d(TAG, "✅ Events listener cleaned up");
+        }
     }
 }

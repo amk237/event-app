@@ -76,6 +76,9 @@ public class BrowseEventsTabFragment extends Fragment {
     private List<String> customCategories = new ArrayList<>(); // User-added categories
     private List<Chip> customCategoryChips = new ArrayList<>(); // Dynamically created chips
 
+    // ✨ Real-time listener for all events
+    private com.google.firebase.firestore.ListenerRegistration eventsListener;
+
     // Sort options
     private enum SortOption {
         DATE_ASC("Date (Soonest First)"),
@@ -274,14 +277,35 @@ public class BrowseEventsTabFragment extends Fragment {
         }
     }
 
+    /**
+     * ✨ UPDATED: Real-time updates for all active events
+     * Events appear/update instantly across all users!
+     */
     private void loadAllEvents() {
         showLoading();
 
-        db.collection("events")
+        // Remove old listener if exists
+        if (eventsListener != null) {
+            eventsListener.remove();
+        }
+
+        // ✨ Real-time listener - Updates automatically when events are created/modified!
+        eventsListener = db.collection("events")
                 .whereEqualTo("status", "active")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to events", error);
+                        showError("Failed to load events. Please try again.");
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots == null) {
+                        allEvents.clear();
+                        applyFiltersAndSort();
+                        return;
+                    }
+
                     allEvents.clear();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
@@ -289,12 +313,8 @@ public class BrowseEventsTabFragment extends Fragment {
                         allEvents.add(event);
                     }
 
-                    Log.d(TAG, "Loaded " + allEvents.size() + " events");
+                    Log.d(TAG, "⚡ Real-time update: " + allEvents.size() + " events");
                     applyFiltersAndSort();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading events", e);
-                    showError("Failed to load events. Please try again.");
                 });
     }
 
@@ -518,9 +538,14 @@ public class BrowseEventsTabFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        loadCustomCategories(); // Reload custom categories in case new ones were added
-        loadAllEvents();
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // ✨ Clean up real-time listener to prevent memory leaks
+        if (eventsListener != null) {
+            eventsListener.remove();
+            eventsListener = null;
+            Log.d(TAG, "✅ Events listener cleaned up");
+        }
     }
 }

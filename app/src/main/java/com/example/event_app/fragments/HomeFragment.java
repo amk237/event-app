@@ -90,11 +90,11 @@ public class HomeFragment extends Fragment {
     // Notification service
     private NotificationService notificationService;
 
-    // ✨ Real-time badge listener
+    // ✨ Real-time listeners
     private ListenerRegistration badgeListener;
-
-    // ✨ NEW: Real-time favorites listener
     private ListenerRegistration favoritesListener;
+    private ListenerRegistration happeningSoonListener;
+    private ListenerRegistration popularListener;
 
     // Permission launcher for camera
     private final ActivityResultLauncher<String> requestPermissionLauncher =
@@ -320,28 +320,50 @@ public class HomeFragment extends Fragment {
         qrCodeLauncher.launch(options);
     }
 
+    /**
+     * ✨ UPDATED: Real-time updates for happening soon events
+     * New events appear instantly without refresh!
+     */
     private void loadHappeningSoonEvents() {
-        Log.d(TAG, "Loading happening soon events...");
+        Log.d(TAG, "Setting up real-time listener for happening soon events...");
 
         Calendar calendar = Calendar.getInstance();
         Date today = calendar.getTime();
         calendar.add(Calendar.DAY_OF_YEAR, 7);
         Date weekFromNow = calendar.getTime();
 
-        db.collection("events")
+        // Remove old listener if exists
+        if (happeningSoonListener != null) {
+            happeningSoonListener.remove();
+        }
+
+        // ✨ Real-time listener - Updates automatically!
+        happeningSoonListener = db.collection("events")
                 .whereEqualTo("status", "active")
                 .whereGreaterThanOrEqualTo("eventDate", today)
                 .whereLessThanOrEqualTo("eventDate", weekFromNow)
                 .orderBy("eventDate", Query.Direction.ASCENDING)
                 .limit(10)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to happening soon events", error);
+                        showEmptyState(rvHappeningSoon, emptyHappeningSoon);
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots == null) {
+                        showEmptyState(rvHappeningSoon, emptyHappeningSoon);
+                        return;
+                    }
+
                     List<Event> events = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
                         event.setId(doc.getId());
                         events.add(event);
                     }
+
+                    Log.d(TAG, "⚡ Real-time update: " + events.size() + " happening soon events");
 
                     if (events.isEmpty()) {
                         showEmptyState(rvHappeningSoon, emptyHappeningSoon);
@@ -349,22 +371,38 @@ public class HomeFragment extends Fragment {
                         showEvents(rvHappeningSoon, emptyHappeningSoon);
                         happeningSoonAdapter.setEvents(events);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading happening soon events", e);
-                    showEmptyState(rvHappeningSoon, emptyHappeningSoon);
                 });
     }
 
+    /**
+     * ✨ UPDATED: Real-time updates for popular events
+     * Events update automatically as waiting lists grow!
+     */
     private void loadPopularEvents() {
-        Log.d(TAG, "Loading popular events...");
+        Log.d(TAG, "Setting up real-time listener for popular events...");
 
-        db.collection("events")
+        // Remove old listener if exists
+        if (popularListener != null) {
+            popularListener.remove();
+        }
+
+        // ✨ Real-time listener - Updates automatically!
+        popularListener = db.collection("events")
                 .whereEqualTo("status", "active")
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .limit(10)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addSnapshotListener((queryDocumentSnapshots, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to popular events", error);
+                        showEmptyState(rvPopular, emptyPopular);
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots == null) {
+                        showEmptyState(rvPopular, emptyPopular);
+                        return;
+                    }
+
                     List<Event> events = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Event event = doc.toObject(Event.class);
@@ -372,11 +410,14 @@ public class HomeFragment extends Fragment {
                         events.add(event);
                     }
 
+                    // Sort by waiting list size (most popular first)
                     events.sort((e1, e2) -> {
                         int size1 = e1.getWaitingList() != null ? e1.getWaitingList().size() : 0;
                         int size2 = e2.getWaitingList() != null ? e2.getWaitingList().size() : 0;
                         return Integer.compare(size2, size1);
                     });
+
+                    Log.d(TAG, "⚡ Real-time update: " + events.size() + " popular events");
 
                     if (events.isEmpty()) {
                         showEmptyState(rvPopular, emptyPopular);
@@ -384,10 +425,6 @@ public class HomeFragment extends Fragment {
                         showEvents(rvPopular, emptyPopular);
                         popularAdapter.setEvents(events);
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading popular events", e);
-                    showEmptyState(rvPopular, emptyPopular);
                 });
     }
 
@@ -501,27 +538,30 @@ public class HomeFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        loadHappeningSoonEvents();
-        loadPopularEvents();
-        updateNotificationBadge();
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
 
-        // ✨ Clean up real-time listeners
+        // ✨ Clean up ALL real-time listeners to prevent memory leaks
         if (badgeListener != null) {
             badgeListener.remove();
             badgeListener = null;
         }
 
-        // ✨ NEW: Clean up favorites listener
         if (favoritesListener != null) {
             favoritesListener.remove();
             favoritesListener = null;
         }
+
+        if (happeningSoonListener != null) {
+            happeningSoonListener.remove();
+            happeningSoonListener = null;
+        }
+
+        if (popularListener != null) {
+            popularListener.remove();
+            popularListener = null;
+        }
+
+        Log.d(TAG, "✅ All real-time listeners cleaned up");
     }
 }

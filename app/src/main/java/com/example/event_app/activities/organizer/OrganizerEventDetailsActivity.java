@@ -108,6 +108,9 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
     private String eventId;
     private Event event;
 
+    // ✨ Real-time listener for event updates
+    private com.google.firebase.firestore.ListenerRegistration eventListener;
+
     // Image picker
     private Uri newPosterUri;
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
@@ -248,24 +251,41 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * ✨ UPDATED: Real-time event details - Updates automatically!
+     * Organizers see live updates as entrants join, accept invitations, etc.
+     */
     private void loadEventDetails() {
         showLoading();
 
-        db.collection("events").document(eventId)
-                .get()
-                .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        event = document.toObject(Event.class);
-                        if (event != null) {
-                            event.setId(document.getId());
-                            displayEventInfo();
-                        }
+        // Remove old listener if exists
+        if (eventListener != null) {
+            eventListener.remove();
+        }
+
+        // ✨ Real-time listener - Updates automatically when event changes!
+        eventListener = db.collection("events").document(eventId)
+                .addSnapshotListener((document, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to event", error);
+                        Toast.makeText(this, "Error loading event", Toast.LENGTH_SHORT).show();
+                        hideLoading();
+                        return;
                     }
-                    hideLoading();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading event", e);
-                    Toast.makeText(this, "Error loading event", Toast.LENGTH_SHORT).show();
+
+                    if (document == null || !document.exists()) {
+                        Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
+                        hideLoading();
+                        finish();
+                        return;
+                    }
+
+                    event = document.toObject(Event.class);
+                    if (event != null) {
+                        event.setId(document.getId());
+                        displayEventInfo();
+                        Log.d(TAG, "⚡ Real-time update: Event details refreshed");
+                    }
                     hideLoading();
                 });
     }
@@ -1031,8 +1051,14 @@ public class OrganizerEventDetailsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        loadEventDetails();
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // ✨ Clean up real-time listener to prevent memory leaks
+        if (eventListener != null) {
+            eventListener.remove();
+            eventListener = null;
+            Log.d(TAG, "✅ Event listener cleaned up");
+        }
     }
 }

@@ -78,6 +78,9 @@ public class EventDetailsActivity extends AppCompatActivity {
     private NotificationService notificationService;
     private FusedLocationProviderClient fusedLocationClient;
 
+    // ✨ Real-time listener for event updates
+    private com.google.firebase.firestore.ListenerRegistration eventListener;
+
     // Data
     private String eventId;
     private Event event;
@@ -161,27 +164,41 @@ public class EventDetailsActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * ✨ UPDATED: Real-time event details - Updates automatically!
+     * If organizer changes event info, entrants see it instantly
+     */
     private void loadEventDetails() {
         showLoading();
 
-        db.collection("events").document(eventId)
-                .get()
-                .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        event = document.toObject(Event.class);
-                        if (event != null) {
-                            event.setId(document.getId());
-                            checkIfOrganizer();
-                            displayEventDetails();
-                            checkUserStatus();
-                        }
-                    } else {
-                        showError("Event not found");
+        // Remove old listener if exists
+        if (eventListener != null) {
+            eventListener.remove();
+        }
+
+        // ✨ Real-time listener - Updates automatically when event changes!
+        eventListener = db.collection("events").document(eventId)
+                .addSnapshotListener((document, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening to event", error);
+                        showError("Failed to load event");
+                        return;
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error loading event", e);
-                    showError("Failed to load event");
+
+                    if (document == null || !document.exists()) {
+                        showError("Event not found");
+                        return;
+                    }
+
+                    event = document.toObject(Event.class);
+                    if (event != null) {
+                        event.setId(document.getId());
+                        checkIfOrganizer();
+                        displayEventDetails();
+                        checkUserStatus();
+
+                        Log.d(TAG, "⚡ Real-time update: Event details refreshed");
+                    }
                 });
     }
 
@@ -281,6 +298,7 @@ public class EventDetailsActivity extends AppCompatActivity {
 
     /**
      * Check user's status: waiting list, selected, or accepted
+     * UPDATED: Added data integrity validation to prevent users in multiple lists
      */
     private void checkUserStatus() {
         if (mAuth.getCurrentUser() == null) {
@@ -297,7 +315,102 @@ public class EventDetailsActivity extends AppCompatActivity {
         isSelected = event.getSelectedList() != null && event.getSelectedList().contains(userId);
         hasAccepted = event.getSignedUpUsers() != null && event.getSignedUpUsers().contains(userId);
 
+        // Validate data integrity: user should only be in ONE list
+        validateUserListIntegrity(userId);
+
         updateButtonState();
+    }
+
+    /**
+     * Validate that user is only in ONE list at a time
+     * This prevents data corruption where users appear in multiple lists
+     */
+    private void validateUserListIntegrity(String userId) {
+        int listCount = 0;
+        StringBuilder listsFound = new StringBuilder();
+
+        if (isOnWaitingList) {
+            listCount++;
+            listsFound.append("waiting list");
+        }
+        if (isSelected) {
+            listCount++;
+            if (listsFound.length() > 0) listsFound.append(", ");
+            listsFound.append("selected list");
+        }
+        if (hasAccepted) {
+            listCount++;
+            if (listsFound.length() > 0) listsFound.append(", ");
+            listsFound.append("signed up list");
+        }
+
+        // Also check declined list (not displayed but could cause issues)
+        boolean isDeclined = event.getDeclinedUsers() != null && event.getDeclinedUsers().contains(userId);
+        if (isDeclined) {
+            listCount++;
+            if (listsFound.length() > 0) listsFound.append(", ");
+            listsFound.append("declined list");
+        }
+
+        if (listCount > 1) {
+            // DATA CORRUPTION DETECTED
+            Log.e(TAG, "DATA INTEGRITY ERROR: User " + userId + " is in " + listCount + " lists: " + listsFound);
+            Toast.makeText(this,
+                "Warning: Your registration status appears in multiple lists. Please contact support.",
+                Toast.LENGTH_LONG).show();
+
+            // Attempt to fix by prioritizing the most advanced state
+            fixUserListCorruption(userId);
+        } else if (listCount == 0) {
+            Log.d(TAG, "User not in any event lists - can join waiting list");
+        } else {
+            Log.d(TAG, "User status OK: in " + listsFound);
+        }
+    }
+
+    /**
+     * Attempt to fix data corruption by prioritizing the correct list
+     * Priority: signed up > selected > waiting list > declined
+     */
+    private void fixUserListCorruption(String userId) {
+        Log.w(TAG, "Attempting to fix data corruption for user " + userId);
+
+        Map<String, Object> updates = new HashMap<>();
+
+        // Priority order: If accepted, remove from all other lists
+        if (hasAccepted) {
+            Log.d(TAG, "Fixing: Keeping user in signedUpUsers, removing from others");
+            updates.put("waitingList", FieldValue.arrayRemove(userId));
+            updates.put("selectedList", FieldValue.arrayRemove(userId));
+            updates.put("declinedUsers", FieldValue.arrayRemove(userId));
+        }
+        // If selected but not accepted, remove from waiting list
+        else if (isSelected) {
+            Log.d(TAG, "Fixing: Keeping user in selectedList, removing from others");
+            updates.put("waitingList", FieldValue.arrayRemove(userId));
+            updates.put("declinedUsers", FieldValue.arrayRemove(userId));
+        }
+        // If on waiting list, remove from selected/declined
+        else if (isOnWaitingList) {
+            Log.d(TAG, "Fixing: Keeping user in waitingList, removing from others");
+            updates.put("selectedList", FieldValue.arrayRemove(userId));
+            updates.put("declinedUsers", FieldValue.arrayRemove(userId));
+        }
+
+        // Apply fixes to Firebase
+        if (!updates.isEmpty()) {
+            db.collection("events").document(eventId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Data corruption fixed successfully");
+                    Toast.makeText(this, "Registration status corrected", Toast.LENGTH_SHORT).show();
+                    loadEventDetails(); // Reload to reflect fixes
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to fix data corruption", e);
+                    Toast.makeText(this, "Could not fix registration status. Please contact support.", Toast.LENGTH_LONG).show();
+                });
+        }
     }
 
     /**
@@ -797,10 +910,14 @@ public class EventDetailsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (event != null) {
-            loadEventDetails();
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // ✨ Clean up real-time listener to prevent memory leaks
+        if (eventListener != null) {
+            eventListener.remove();
+            eventListener = null;
+            Log.d(TAG, "✅ Event listener cleaned up");
         }
     }
 }
