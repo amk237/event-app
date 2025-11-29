@@ -83,8 +83,6 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
         // Set up RecyclerView
         setupRecyclerView();
 
-        // Set up buttons
-        setupButtons();
 
         // Load notification logs
         loadNotificationLogs();
@@ -97,7 +95,6 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
         progressBar = findViewById(R.id.progressBar);
         tvTotalLogs = findViewById(R.id.tvTotalLogs);
-        btnExportLogs = findViewById(R.id.btnExportLogs);
     }
 
     private void setupSearch() {
@@ -163,10 +160,6 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
 
         recyclerViewLogs.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewLogs.setAdapter(logAdapter);
-    }
-
-    private void setupButtons() {
-        btnExportLogs.setOnClickListener(v -> exportLogs());
     }
 
     private void loadNotificationLogs() {
@@ -245,11 +238,6 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
                 .setMessage(details)
                 .setPositiveButton("OK", null)
                 .show();
-    }
-
-    private void exportLogs() {
-        // TODO: Implement CSV export
-        Toast.makeText(this, "CSV export coming soon", Toast.LENGTH_SHORT).show();
     }
 
     @Override

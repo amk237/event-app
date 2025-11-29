@@ -44,14 +44,6 @@
             android:textSize="14sp"
             android:textColor="?attr/colorOnSurfaceVariant"/>
 
-        <!-- Export CSV Button -->
-        <Button
-            android:id="@+id/btnExportCSV"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EXPORT CSV"
-            android:textSize="12sp"/>
 
         <!-- Clear Old Button -->
         <Button

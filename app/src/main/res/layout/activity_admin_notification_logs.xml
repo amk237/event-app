@@ -69,15 +69,6 @@
             android:textSize="14sp"
             android:textColor="?attr/colorOnSurfaceVariant"/>
 
-        <!-- Export Button -->
-        <Button
-            android:id="@+id/btnExportLogs"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EXPORT CSV"
-            android:textSize="12sp"/>
-
     </LinearLayout>
 
     <!-- Progress Bar -->

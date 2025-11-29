@@ -44,7 +44,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
     private LinearLayout emptyStateLayout;
     private ProgressBar progressBar;
     private TextView tvTotalRecords;
-    private Button btnExportCSV;
     private Button btnClearOldRecords;
 
     private GeolocationAuditAdapter auditAdapter;
@@ -91,7 +90,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
         progressBar = findViewById(R.id.progressBar);
         tvTotalRecords = findViewById(R.id.tvTotalRecords);
-        btnExportCSV = findViewById(R.id.btnExportCSV);
         btnClearOldRecords = findViewById(R.id.btnClearOldRecords);
     }
 
@@ -122,7 +120,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
     }
 
     private void setupButtons() {
-        btnExportCSV.setOnClickListener(v -> exportToCSV());
         btnClearOldRecords.setOnClickListener(v -> showClearOldRecordsDialog());
     }
 
@@ -190,11 +187,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
                     Toast.makeText(this, "Map view coming soon", Toast.LENGTH_SHORT).show();
                 })
                 .show();
-    }
-
-    private void exportToCSV() {
-        // TODO: Implement CSV export
-        Toast.makeText(this, "CSV export coming soon", Toast.LENGTH_SHORT).show();
     }
 
     private void showClearOldRecordsDialog() {
