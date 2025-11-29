@@ -90,11 +90,7 @@ public class AdminBrowseImagesActivity extends AppCompatActivity {
         imageAdapter.setOnImageClickListener(new ImageAdapter.OnImageClickListener() {
             @Override
             public void onImageClick(ImageData imageData) {
-                // Optional: Show full-screen image viewer
-                // For now, just show a toast
-                Toast.makeText(AdminBrowseImagesActivity.this,
-                        "Tap delete button to remove image",
-                        Toast.LENGTH_SHORT).show();
+                showImageDetails(imageData);
             }
 
             @Override
@@ -165,6 +161,99 @@ public class AdminBrowseImagesActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                     updateUI();
                 });
+    }
+    /**
+     * Show detailed information about an image
+     */
+    private void showImageDetails(ImageData imageData) {
+        progressBar.setVisibility(View.VISIBLE);
+
+        // Determine what this image is for
+        String imageUrl = imageData.getImageUrl();
+
+        // Check if it's an event poster
+        db.collection("events")
+                .whereEqualTo("posterUrl", imageUrl)
+                .get()
+                .addOnSuccessListener(eventSnapshots -> {
+                    if (!eventSnapshots.isEmpty()) {
+                        // Found the event
+                        QueryDocumentSnapshot eventDoc = (QueryDocumentSnapshot) eventSnapshots.getDocuments().get(0);
+                        String eventName = eventDoc.getString("name");
+                        String organizerId = eventDoc.getString("organizerId");
+                        String organizerName = eventDoc.getString("organizerName");
+
+                        showImageDetailsDialog(
+                                "Event Poster",
+                                eventName,
+                                organizerName != null ? organizerName : "Unknown",
+                                organizerId,
+                                imageData
+                        );
+                    } else {
+                        // Check if it's a profile picture
+                        checkProfilePicture(imageUrl, imageData);
+                    }
+                    progressBar.setVisibility(View.GONE);
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, "Error loading details", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    /**
+     * Check if image is a profile picture
+     */
+    private void checkProfilePicture(String imageUrl, ImageData imageData) {
+        db.collection("users")
+                .whereEqualTo("profileImageUrl", imageUrl)
+                .get()
+                .addOnSuccessListener(userSnapshots -> {
+                    if (!userSnapshots.isEmpty()) {
+                        QueryDocumentSnapshot userDoc = (QueryDocumentSnapshot) userSnapshots.getDocuments().get(0);
+                        String userName = userDoc.getString("name");
+                        String userId = userDoc.getId();
+
+                        showImageDetailsDialog(
+                                "Profile Picture",
+                                "User Profile",
+                                userName != null ? userName : "Unknown",
+                                userId,
+                                imageData
+                        );
+                    } else {
+                        // Orphaned image
+                        showImageDetailsDialog(
+                                "Orphaned Image",
+                                "No associated event or user",
+                                "Unknown",
+                                null,
+                                imageData
+                        );
+                    }
+                });
+    }
+
+    /**
+     * Show dialog with image details
+     */
+    private void showImageDetailsDialog(String imageType, String usedFor, String uploader, String uploaderId, ImageData imageData) {
+        String details = "TYPE: " + imageType + "\n\n" +
+                "USED FOR: " + usedFor + "\n\n" +
+                "UPLOADED BY: " + uploader + "\n\n" +
+                "UPLOADER ID: " + (uploaderId != null ? uploaderId : "N/A") + "\n\n" +
+                "FILE NAME: " + imageData.getImageId() + "\n\n" +
+                "STORAGE PATH: " + imageData.getStoragePath();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Image Details")
+                .setMessage(details)
+                .setPositiveButton("Delete Image", (dialog, which) -> {
+                    showDeleteConfirmation(imageData);
+                })
+                .setNegativeButton("Close", null)
+                .show();
     }
 
     /**

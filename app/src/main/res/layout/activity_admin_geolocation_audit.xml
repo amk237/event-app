@@ -43,18 +43,6 @@
             android:text="Total: 0 records"
             android:textSize="14sp"
             android:textColor="?attr/colorOnSurfaceVariant"/>
-
-
-        <!-- Clear Old Button -->
-        <Button
-            android:id="@+id/btnClearOldRecords"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CLEAR OLD"
-            android:textSize="12sp"
-            android:textColor="#D32F2F"/>
-
     </LinearLayout>
 
     <!-- Progress Bar -->

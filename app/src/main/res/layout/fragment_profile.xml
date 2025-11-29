@@ -290,12 +290,13 @@
                     android:padding="16dp"
                     android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📋"
-                        android:textSize="20sp"
-                        android:layout_marginEnd="12dp"/>
+                    <!-- My Events Icon -->
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_agenda"
+                        android:layout_marginEnd="12dp"
+                        app:tint="#000000"/>
 
                     <TextView
                         android:layout_width="0dp"
@@ -359,12 +360,13 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="➕"
-                            android:textSize="20sp"
-                            android:layout_marginEnd="12dp"/>
+                        <!-- Create Event Icon -->
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_input_add"
+                            android:layout_marginEnd="12dp"
+                            app:tint="#000000"/>
 
                         <TextView
                             android:layout_width="0dp"
@@ -404,12 +406,13 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🎯"
-                            android:textSize="20sp"
-                            android:layout_marginEnd="12dp"/>
+                        <!-- My Organized Events Icon -->
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_my_calendar"
+                            android:layout_marginEnd="12dp"
+                            app:tint="#000000"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -486,12 +489,12 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🔔"
-                            android:textSize="18sp"
-                            android:layout_marginEnd="12dp"/>
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_popup_reminder"
+                            android:layout_marginEnd="12dp"
+                            app:tint="#000000"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -545,12 +548,13 @@
                         android:padding="16dp"
                         android:gravity="center_vertical">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="♿"
-                            android:textSize="18sp"
-                            android:layout_marginEnd="12dp"/>
+                        <!-- Accessibility Icon -->
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:layout_marginEnd="12dp"
+                            app:tint="#000000"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -740,12 +744,13 @@
                             android:padding="16dp"
                             android:gravity="center_vertical">
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🔒"
-                                android:textSize="18sp"
-                                android:layout_marginEnd="12dp"/>
+                            <!-- Admin/Lock Icon -->
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@android:drawable/ic_lock_lock"
+                                android:layout_marginEnd="12dp"
+                                app:tint="#000000"/>
 
                             <LinearLayout
                                 android:layout_width="0dp"

@@ -71,8 +71,11 @@ public class AdminBrowseEventsActivity extends AppCompatActivity {
     private TextView tvResultsCount;
     private TextInputEditText searchEvents;
     private ChipGroup chipGroupStatus;
-    private Chip chipAll, chipActive, chipInactive, chipCompleted;
+    private Chip chipAll, chipActive, chipInactive, chipCompleted, chipCancelled, chipFlagged;  // ✅ ADDED
     private Button btnSort;
+
+
+
 
     private AdminEventAdapter eventAdapter;
 
@@ -139,6 +142,8 @@ public class AdminBrowseEventsActivity extends AppCompatActivity {
         chipInactive = findViewById(R.id.chipInactive);
         chipCompleted = findViewById(R.id.chipCompleted);
         btnSort = findViewById(R.id.btnSort);
+        chipCancelled = findViewById(R.id.chipCancelled);
+        chipFlagged = findViewById(R.id.chipFlagged);
     }
 
     /**
@@ -212,6 +217,10 @@ public class AdminBrowseEventsActivity extends AppCompatActivity {
                 currentStatusFilter = "inactive";
             } else if (checkedId == R.id.chipCompleted) {
                 currentStatusFilter = "completed";
+            } else if (checkedId == R.id.chipCancelled) {
+                currentStatusFilter = "cancelled";
+            } else if (checkedId == R.id.chipFlagged) {
+                currentStatusFilter = "flagged";
             }
 
             Log.d(TAG, "Status filter changed to: " + currentStatusFilter);
@@ -376,6 +385,10 @@ public class AdminBrowseEventsActivity extends AppCompatActivity {
     private boolean matchesStatusFilter(Event event) {
         if ("all".equals(currentStatusFilter)) {
             return true;
+        }
+
+        if ("flagged".equals(currentStatusFilter)) {
+            return event.hasHighCancellationRate();
         }
 
         String eventStatus = event.getStatus();

@@ -63,7 +63,7 @@
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
+                android:maxLines="6"
                 android:ellipsize="end"/>
 
             <!-- Message -->
@@ -88,7 +88,7 @@
                 android:textColor="#2196F3"
                 android:textSize="13sp"
                 android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
+                android:maxLines="6"
                 android:ellipsize="end"/>
 
             <!-- Time -->
@@ -100,7 +100,7 @@
                 android:text="2 hours ago"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="12sp"
-                android:maxLines="1"/>
+                android:maxLines="6"/>
 
         </LinearLayout>
 

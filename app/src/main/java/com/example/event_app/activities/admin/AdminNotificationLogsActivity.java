@@ -29,6 +29,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,7 +47,6 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
     private LinearLayout emptyStateLayout;
     private ProgressBar progressBar;
     private TextView tvTotalLogs;
-    private Button btnExportLogs;
 
     private NotificationLogAdapter logAdapter;
     private FirebaseFirestore db;
@@ -120,9 +120,7 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
                 "Invitation Sent",
                 "Selected",
                 "Rejected",
-                "Waitlist Joined",
-                "Today",
-                "This Week"
+                "Waitlist Joined"
         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -167,14 +165,10 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
 
         Query query = db.collection("notification_logs")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(500);
+                .orderBy("timestamp", Query.Direction.DESCENDING);
 
-        // Apply filters
-        if (currentFilter.equals("Organizer Only")) {
-            // This would need a field in the log to track sender role
-            // For now, load all and filter in adapter
-        } else if (currentFilter.equals("Invitation Sent")) {
+        // Apply filters based on selection
+        if (currentFilter.equals("Invitation Sent")) {
             query = query.whereEqualTo("notificationType", "invitation_sent");
         } else if (currentFilter.equals("Selected")) {
             query = query.whereEqualTo("notificationType", "selected");
@@ -182,15 +176,26 @@ public class AdminNotificationLogsActivity extends AppCompatActivity {
             query = query.whereEqualTo("notificationType", "rejected");
         } else if (currentFilter.equals("Waitlist Joined")) {
             query = query.whereEqualTo("notificationType", "waitlist_joined");
-        }
 
-        query.get()
+        }
+        // "All Notifications" and "Organizer Only" - load all, filter later
+
+        query.limit(500)
+                .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     logList.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         NotificationLog log = document.toObject(NotificationLog.class);
-                        logList.add(log);
+
+                        // Apply organizer filter if selected
+                        if (currentFilter.equals("Organizer Only")) {
+                            // Only add if sender is organizer (you may need to check roles)
+                            // For now, we'll add all and let it pass
+                            logList.add(log);
+                        } else {
+                            logList.add(log);
+                        }
                     }
 
                     Log.d(TAG, "Loaded " + logList.size() + " notification logs");

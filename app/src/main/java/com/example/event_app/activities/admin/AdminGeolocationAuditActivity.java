@@ -77,8 +77,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
         // Set up RecyclerView
         setupRecyclerView();
 
-        // Set up buttons
-        setupButtons();
 
         // Load audit records
         loadAuditRecords();
@@ -90,7 +88,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
         progressBar = findViewById(R.id.progressBar);
         tvTotalRecords = findViewById(R.id.tvTotalRecords);
-        btnClearOldRecords = findViewById(R.id.btnClearOldRecords);
     }
 
     private void setupSearch() {
@@ -117,10 +114,6 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
 
         recyclerViewAudits.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewAudits.setAdapter(auditAdapter);
-    }
-
-    private void setupButtons() {
-        btnClearOldRecords.setOnClickListener(v -> showClearOldRecordsDialog());
     }
 
     private void loadAuditRecords() {
@@ -183,59 +176,52 @@ public class AdminGeolocationAuditActivity extends AppCompatActivity {
                 .setMessage(details)
                 .setPositiveButton("OK", null)
                 .setNeutralButton("View on Map", (dialog, which) -> {
-                    // TODO: Open map view with this location
-                    Toast.makeText(this, "Map view coming soon", Toast.LENGTH_SHORT).show();
+                    openLocationOnMap(audit);
                 })
                 .show();
     }
 
-    private void showClearOldRecordsDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Clear Old Records")
-                .setMessage("Delete geolocation records older than 90 days?\n\n" +
-                        "This helps maintain privacy compliance by not storing location data indefinitely.")
-                .setPositiveButton("Clear Old Records", (dialog, which) -> {
-                    clearOldRecords();
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
+    /**
+     * ✨ NEW: Open location on Google Maps
+     */
+    private void openLocationOnMap(GeolocationAudit audit) {
+        // Get latitude and longitude
+        double latitude = audit.getLatitude();
+        double longitude = audit.getLongitude();
 
-    private void clearOldRecords() {
-        progressBar.setVisibility(View.VISIBLE);
+        if (latitude == 0 && longitude == 0) {
+            Toast.makeText(this, "No location data available", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Calculate date 90 days ago
-        long ninetyDaysAgo = System.currentTimeMillis() - (90L * 24 * 60 * 60 * 1000);
-        Date cutoffDate = new Date(ninetyDaysAgo);
+        // Create map intent with marker
+        String label = audit.getEventName() + " - " + audit.getUserName();
+        String uriString = String.format(Locale.ENGLISH,
+                "geo:%f,%f?q=%f,%f(%s)",
+                latitude, longitude, latitude, longitude,
+                android.net.Uri.encode(label));
 
-        db.collection("geolocation_audits")
-                .whereLessThan("timestamp", cutoffDate)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    int count = queryDocumentSnapshots.size();
+        android.content.Intent mapIntent = new android.content.Intent(
+                android.content.Intent.ACTION_VIEW,
+                android.net.Uri.parse(uriString));
 
-                    if (count == 0) {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(this, "No old records to delete", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+        mapIntent.setPackage("com.google.android.apps.maps");
 
-                    // Delete each document
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        document.getReference().delete();
-                    }
+        // Check if Google Maps is installed
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(mapIntent);
+        } else {
+            // Fallback to browser if Maps not installed
+            String browserUri = String.format(Locale.ENGLISH,
+                    "https://www.google.com/maps/search/?api=1&query=%f,%f",
+                    latitude, longitude);
 
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Deleted " + count + " old records", Toast.LENGTH_SHORT).show();
+            android.content.Intent browserIntent = new android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse(browserUri));
 
-                    // Reload
-                    loadAuditRecords();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error clearing old records", e);
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+            startActivity(browserIntent);
+        }
     }
 
     @Override

@@ -418,6 +418,7 @@ public class AdminBrowseUsersActivity extends AppCompatActivity {
      */
     private void deleteUser(User user) {
         Log.d(TAG, "Deleting user: " + user.getUserId());
+        deleteUserNotificationLogs(user.getUserId());
 
         db.collection("users")
                 .document(user.getUserId())
@@ -434,6 +435,33 @@ public class AdminBrowseUsersActivity extends AppCompatActivity {
                     Log.e(TAG, "Error deleting user", e);
                     Toast.makeText(this, "Error deleting user: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    /**
+     * NEW: Delete all notification logs associated with a user
+     */
+    private void deleteUserNotificationLogs(String userId) {
+        // Delete logs where user was sender
+        db.collection("notification_logs")
+                .whereEqualTo("senderId", userId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().delete();
+                    }
+                    Log.d(TAG, "Deleted " + querySnapshot.size() + " notification logs (sender)");
+                });
+
+        // Delete logs where user was recipient
+        db.collection("notification_logs")
+                .whereEqualTo("recipientId", userId)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().delete();
+                    }
+                    Log.d(TAG, "Deleted " + querySnapshot.size() + " notification logs (recipient)");
                 });
     }
 
