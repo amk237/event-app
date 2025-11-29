@@ -51,6 +51,7 @@ import java.util.Map;
  * US 01.05.03: Decline invitation
  * US 01.06.01: View event from QR code
  * US 01.05.04: See total entrants count
+ * US 01.05.05: Show lottery selection criteria (NEW)
  * US 02.02.02: Capture location when joining (for organizer map view)
  *
  * UPDATED: Added geolocation audit logging for privacy compliance
@@ -67,6 +68,8 @@ public class EventDetailsActivity extends AppCompatActivity {
     private MaterialButton btnJoinWaitingList, btnLeaveWaitingList;
     private MaterialButton btnAcceptInvitation, btnDeclineInvitation;
     private MaterialCardView cardLocation, cardInvitation;
+    // ✨ NEW: Lottery info card
+    private MaterialCardView cardLotteryInfo;
     private View loadingView, contentView, errorView;
 
     // Firebase
@@ -132,6 +135,9 @@ public class EventDetailsActivity extends AppCompatActivity {
         btnDeclineInvitation = findViewById(R.id.btnDeclineInvitation);
         cardInvitation = findViewById(R.id.cardInvitation);
 
+        // ✨ NEW: Lottery info card
+        cardLotteryInfo = findViewById(R.id.cardLotteryInfo);
+
         // Button listeners
         btnJoinWaitingList.setOnClickListener(v -> joinWaitingList());
         btnLeaveWaitingList.setOnClickListener(v -> leaveWaitingList());
@@ -148,6 +154,11 @@ public class EventDetailsActivity extends AppCompatActivity {
 
         // Location card click listener
         cardLocation.setOnClickListener(v -> openLocationInMaps());
+
+        // ✨ NEW: Lottery info card listener
+        if (cardLotteryInfo != null) {
+            cardLotteryInfo.setOnClickListener(v -> showLotteryInfoDialog());
+        }
     }
 
     private void loadEventDetails() {
@@ -677,6 +688,62 @@ public class EventDetailsActivity extends AppCompatActivity {
                     if (btnAcceptInvitation != null) btnAcceptInvitation.setEnabled(true);
                     if (btnDeclineInvitation != null) btnDeclineInvitation.setEnabled(true);
                 });
+    }
+
+    /**
+     * ✨ US 01.05.05: Show lottery selection criteria
+     */
+    private void showLotteryInfoDialog() {
+        // Build the lottery info message
+        StringBuilder info = new StringBuilder();
+
+        info.append("📋 How the Lottery Works\n\n");
+
+        info.append("🎲 Selection Process:\n");
+        info.append("• All entrants have an equal chance\n");
+        info.append("• Winners selected randomly after registration closes\n");
+        info.append("• Fair and transparent process\n");
+        info.append("• No first-come-first-served advantage\n\n");
+
+        info.append("📅 Timeline:\n");
+        if (event.getRegistrationEndDate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+            info.append("• Registration closes: ").append(sdf.format(event.getRegistrationEndDate())).append("\n");
+            info.append("• Lottery runs after registration closes\n");
+        } else {
+            info.append("• Lottery runs when organizer decides\n");
+        }
+        info.append("• You'll be notified of results\n\n");
+
+        info.append("✅ If You're Selected:\n");
+        info.append("• You'll receive a notification\n");
+        info.append("• Accept or decline your invitation\n");
+        info.append("• If you decline, another entrant gets your spot\n\n");
+
+        info.append("📊 Current Status:\n");
+        int waitingCount = event.getWaitingList() != null ? event.getWaitingList().size() : 0;
+        int selectedCount = event.getSelectedList() != null ? event.getSelectedList().size() : 0;
+
+        info.append("• People on waiting list: ").append(waitingCount).append("\n");
+
+        if (event.getCapacity() != null) {
+            info.append("• Total spots available: ").append(event.getCapacity()).append("\n");
+            info.append("• Already selected: ").append(selectedCount).append("\n");
+            int remaining = event.getCapacity().intValue() - selectedCount;
+            info.append("• Spots remaining: ").append(Math.max(0, remaining)).append("\n");
+        } else {
+            info.append("• Capacity: Unlimited\n");
+        }
+
+        info.append("\n💡 Equal opportunity for everyone!");
+
+        // Show dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Lottery Selection Criteria")
+                .setMessage(info.toString())
+                .setPositiveButton("Got it!", null)
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .show();
     }
 
     private void showLoading() {
