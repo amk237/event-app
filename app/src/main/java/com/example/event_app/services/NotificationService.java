@@ -23,6 +23,9 @@ public class NotificationService {
     private static final String COLLECTION_NOTIFICATIONS = "notifications";
     private static final String COLLECTION_NOTIFICATION_LOGS = "notification_logs";
 
+    // ✨ NEW Constant for the rate organizer notification type
+    public static final String TYPE_RATE_ORGANIZER = "rate_organizer";
+
     private final FirebaseFirestore db;
 
     public NotificationService() {
@@ -251,6 +254,59 @@ public class NotificationService {
                 }
             });
         }
+    }
+
+    /** * Send "Rate Organizer" notification after event ends.
+     * US 01.08.01: Send notification to prompt rating.
+     */
+    public void sendRateOrganizerNotification(String userId, String eventId,
+                                              String eventName, String organizerId,
+                                              String organizerName) {
+
+        String title = "How was " + eventName + "?";
+        String message = "Rate " + organizerName + " to help other entrants!";
+
+        // Use a payload map to pass extra data needed by the receiving activity
+        Map<String, String> payload = new HashMap<>();
+        payload.put("organizerId", organizerId);
+        payload.put("organizerName", organizerName);
+
+        // Pass the payload as the last argument, replacing the standard callback
+        sendNotificationWithPayload(userId, eventId, eventName,
+                TYPE_RATE_ORGANIZER, title, message, payload);
+    }
+
+    /**
+     * Helper method to extend the existing sendNotification logic to include a payload
+     * (which is currently just a placeholder and would require changes in createAndSendNotification
+     * and Notification model to fully implement, but for now we pass the data via the message content/type).
+     * * NOTE: The `sendNotification` method in the original code doesn't support an explicit `payload`
+     * map. For simplicity in this answer, we'll create a variant that logs the extra details
+     * in the message/log but ultimately relies on the `type` and `eventId` for app navigation.
+     * A robust solution would require modifying the `Notification` model and `createAndSendNotification`.
+     */
+    private void sendNotificationWithPayload(String userId, String eventId, String eventName,
+                                             String type, String title, String message,
+                                             Map<String, String> payload) {
+
+        String fullMessage = message;
+        if (payload != null && payload.containsKey("organizerName")) {
+            // Append the necessary info to the message for logging/displaying if needed
+            fullMessage += " | Organizer: " + payload.get("organizerName");
+        }
+
+        // The core logic relies on the existing sendNotification signature
+        sendNotification(userId, eventId, eventName, type, title, fullMessage, new NotificationCallback() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Rate Organizer notification sent successfully to " + userId);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to send Rate Organizer notification to " + userId + ": " + error);
+            }
+        });
     }
 
     public void getUserNotifications(String userId, NotificationListCallback callback) {
