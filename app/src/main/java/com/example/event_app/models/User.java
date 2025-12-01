@@ -1,6 +1,7 @@
 package com.example.event_app.models;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a user within the LuckySpot system. A user is uniquely identified
@@ -22,6 +23,9 @@ public class User {
     private boolean notificationsEnabled;
     private long createdAt;
     private long updatedAt;
+
+    // Optional profile details
+    private Integer age;
 
     // Favorite events
     private List<String> favoriteEvents; // List of event IDs marked as favorite
@@ -151,6 +155,7 @@ public class User {
     public long getUpdatedAt() { return updatedAt; }
     public List<String> getFavoriteEvents() { return favoriteEvents; }
     public String getFcmToken() { return fcmToken; } // ✨ NEW
+    public Integer getAge() { return age; }
 
     // Setters
     public void setUserId(String userId) { this.userId = userId; }
@@ -164,5 +169,49 @@ public class User {
     public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
     public void setFavoriteEvents(List<String> favoriteEvents) { this.favoriteEvents = favoriteEvents; }
     public void setFcmToken(String fcmToken) { this.fcmToken = fcmToken; }
+    public void setAge(Integer age) { this.age = age; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return notificationsEnabled == user.notificationsEnabled &&
+                createdAt == user.createdAt &&
+                updatedAt == user.updatedAt &&
+                Objects.equals(userId, user.userId) &&
+                Objects.equals(deviceId, user.deviceId) &&
+                Objects.equals(name, user.name) &&
+                Objects.equals(email, user.email) &&
+                Objects.equals(phoneNumber, user.phoneNumber) &&
+                Objects.equals(roles, user.roles) &&
+                Objects.equals(favoriteEvents, user.favoriteEvents) &&
+                Objects.equals(fcmToken, user.fcmToken) &&
+                Objects.equals(age, user.age);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, deviceId, name, email, phoneNumber, roles, notificationsEnabled,
+                createdAt, updatedAt, favoriteEvents, fcmToken, age);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId='" + userId + '\'' +
+                ", deviceId='" + deviceId + '\'' +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", roles=" + roles +
+                ", notificationsEnabled=" + notificationsEnabled +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", favoriteEvents=" + favoriteEvents +
+                ", fcmToken='" + fcmToken + '\'' +
+                ", age=" + age +
+                '}';
+    }
 }
 
