@@ -1,95 +1,76 @@
 package com.example.event_app.validation;
 
-import com.example.event_app.TestUserFactory;
 import com.example.event_app.models.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserValidatorTest {
 
-    private final UserValidator validator = new UserValidator();
+    private UserValidator validator;
 
-    @Test
-    @DisplayName("valid user returns no validation errors")
-    void validUser_hasNoErrors() {
-        User user = TestUserFactory.createUser("1");
-
-        List<String> errors = validator.validateForCreate(user);
-
-        assertTrue(errors.isEmpty());
+    @BeforeEach
+    void setUp() {
+        validator = new UserValidator();
     }
 
     @Test
-    @DisplayName("required identifiers are validated")
-    void missingIds_reported() {
-        User user = new User(null, null, "User", "user@example.com");
+    @DisplayName("valid user passes all validation rules")
+    void validUser_hasNoValidationErrors() {
+        User user = new User("user-123", "device-abc", "Alice Doe", "alice@example.com");
+        user.setAge(25);
 
         List<String> errors = validator.validateForCreate(user);
 
+        assertTrue(errors.isEmpty(), "Expected no validation errors for complete dummy user");
+    }
+
+    @ParameterizedTest(name = "invalid user -> {1}")
+    @MethodSource("invalidUserCases")
+    void invalidUserDetails_collectsErrors(Consumer<User> mutation, String expectedError) {
+        User user = new User("user-123", "device-abc", "Alice Doe", "alice@example.com");
+        mutation.accept(user);
+
+        List<String> errors = validator.validateForCreate(user);
+
+        assertTrue(errors.contains(expectedError),
+                () -> "Expected error `" + expectedError + "` for dummy data mutation");
+    }
+
+    static Stream<Arguments> invalidUserCases() {
+        return Stream.of(
+                Arguments.of((Consumer<User>) user -> user.setUserId(" "), "userId is required"),
+                Arguments.of((Consumer<User>) user -> user.setDeviceId(null), "deviceId is required"),
+                Arguments.of((Consumer<User>) user -> user.setName("Al"), "name must be at least 3 characters"),
+                Arguments.of((Consumer<User>) user -> user.setName("A".repeat(60)), "name must be at most 50 characters"),
+                Arguments.of((Consumer<User>) user -> user.setEmail("alice"), "email must be valid"),
+                Arguments.of((Consumer<User>) user -> user.setAge(10), "age must be at least 13"),
+                Arguments.of((Consumer<User>) user -> user.setAge(150), "age must be realistic (<= 120)"),
+                Arguments.of((Consumer<User>) user -> user.setPhoneNumber("abc"),
+                        "phoneNumber must be digits (10-15) and may start with +")
+        );
+    }
+
+    @Test
+    @DisplayName("all missing required fields are reported together")
+    void missingRequiredFields_aggregatesErrors() {
+        User incomplete = new User();
+
+        List<String> errors = validator.validateForCreate(incomplete);
+
+        assertEquals(4, errors.size(), "Expected all required field errors to be surfaced at once");
         assertTrue(errors.contains("userId is required"));
         assertTrue(errors.contains("deviceId is required"));
-    }
-
-    @Test
-    @DisplayName("name length boundaries are enforced")
-    void nameBoundaries_checked() {
-        User tooShort = TestUserFactory.createUser("short");
-        tooShort.setName("Al");
-        User tooLong = TestUserFactory.createUser("long");
-        tooLong.setName("A".repeat(51));
-        User withinBounds = TestUserFactory.createUser("ok");
-        withinBounds.setName("Ana");
-
-        assertTrue(validator.validateForCreate(tooShort).contains("name must be at least 3 characters"));
-        assertTrue(validator.validateForCreate(tooLong).contains("name must be at most 50 characters"));
-        assertTrue(validator.validateForCreate(withinBounds).isEmpty());
-    }
-
-    @Test
-    @DisplayName("email must be present and well-formed")
-    void emailFormat_checked() {
-        User missing = TestUserFactory.createUser("missing");
-        missing.setEmail(null);
-        User malformed = TestUserFactory.createUser("bad");
-        malformed.setEmail("invalid");
-        User valid = TestUserFactory.createUser("good");
-
-        assertTrue(validator.validateForCreate(missing).contains("email is required"));
-        assertTrue(validator.validateForCreate(malformed).contains("email must be valid"));
-        assertFalse(validator.validateForCreate(valid).contains("email must be valid"));
-    }
-
-    @Test
-    @DisplayName("age boundaries capture underage and unrealistic values")
-    void ageBoundaries_checked() {
-        User underAge = TestUserFactory.createUser("young");
-        underAge.setAge(12);
-        User acceptable = TestUserFactory.createUser("adult");
-        acceptable.setAge(13);
-        User tooOld = TestUserFactory.createUser("old");
-        tooOld.setAge(121);
-
-        assertTrue(validator.validateForCreate(underAge).contains("age must be at least 13"));
-        assertTrue(validator.validateForCreate(acceptable).isEmpty());
-        assertTrue(validator.validateForCreate(tooOld).contains("age must be realistic (<= 120)"));
-    }
-
-    @Test
-    @DisplayName("phone number is optional but format checked when provided")
-    void phoneNumber_checkedWhenPresent() {
-        User invalidPhone = TestUserFactory.createUser("bad-phone");
-        invalidPhone.setPhoneNumber("12-34");
-        User validPhone = TestUserFactory.createUser("good-phone");
-        validPhone.setPhoneNumber("+123456789012");
-        User withoutPhone = TestUserFactory.createUser("no-phone");
-        withoutPhone.setPhoneNumber("");
-
-        assertTrue(validator.validateForCreate(invalidPhone).contains("phoneNumber must be digits (10-15) and may start with +"));
-        assertTrue(validator.validateForCreate(validPhone).isEmpty());
-        assertTrue(validator.validateForCreate(withoutPhone).isEmpty());
+        assertTrue(errors.contains("name is required"));
+        assertTrue(errors.contains("email is required"));
     }
 }

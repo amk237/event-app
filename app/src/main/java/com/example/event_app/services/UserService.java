@@ -6,6 +6,9 @@ import com.example.event_app.validation.UserValidationException;
 import com.example.event_app.validation.UserValidator;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Simple service demonstrating stateful behaviors for {@link User} entities.
@@ -18,6 +21,14 @@ public class UserService {
     public UserService(UserRepository repository, UserValidator validator) {
         this.repository = repository;
         this.validator = validator;
+    }
+
+    /**
+     * Convenience factory for unit tests that prefer a lightweight, in-memory
+     * store instead of a mocked {@link UserRepository} implementation.
+     */
+    public static UserService withInMemoryStore(UserValidator validator) {
+        return new UserService(new InMemoryUserRepository(), validator);
     }
 
     public User createUser(String userId, String deviceId, String name, String email, Integer age) {
@@ -58,5 +69,32 @@ public class UserService {
         user.addFavorite(eventId);
         user.setUpdatedAt(System.currentTimeMillis());
         return repository.save(user);
+    }
+
+    /**
+     * Minimal repository implementation backed by an in-memory map so tests can
+     * exercise {@link UserService} without depending on a concrete repository
+     * class.
+     */
+    public static class InMemoryUserRepository implements UserRepository {
+        private final Map<String, User> users = new ConcurrentHashMap<>();
+
+        @Override
+        public Optional<User> findById(String userId) {
+            return Optional.ofNullable(users.get(userId));
+        }
+
+        @Override
+        public Optional<User> findByDeviceId(String deviceId) {
+            return users.values().stream()
+                    .filter(user -> deviceId != null && deviceId.equals(user.getDeviceId()))
+                    .findFirst();
+        }
+
+        @Override
+        public User save(User user) {
+            users.put(user.getUserId(), user);
+            return user;
+        }
     }
 }
