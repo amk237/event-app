@@ -67,6 +67,9 @@ import java.util.Set;
  * US 02.04.01: Upload event poster
  */
 public class CreateEventActivity extends AppCompatActivity {
+
+    private static final String TAG = "CreateEventActivity";
+
     // UI Elements
     private TextInputEditText editEventName, editDescription, editLocation, editCapacity;
     private MaterialButton btnSelectPoster, btnSelectEventDate, btnSelectRegStart, btnSelectRegEnd;
