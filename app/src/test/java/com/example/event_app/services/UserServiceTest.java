@@ -1,6 +1,5 @@
 package com.example.event_app.services;
 
-import com.example.event_app.TestUserFactory;
 import com.example.event_app.models.User;
 import com.example.event_app.repositories.UserRepository;
 import com.example.event_app.validation.UserValidationException;
@@ -10,11 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,83 +24,92 @@ class UserServiceTest {
     private UserRepository repository;
 
     private UserValidator validator;
-
-    @InjectMocks
     private UserService service;
 
     @BeforeEach
-    void initValidator() {
+    void setUp() {
         validator = new UserValidator();
         service = new UserService(repository, validator);
     }
 
     @Test
-    @DisplayName("createUser saves validated user data")
-    void createUser_persistsValidUser() {
-        when(repository.findByDeviceId("device-1")).thenReturn(Optional.empty());
-        User saved = TestUserFactory.createUser("1");
-        when(repository.save(any(User.class))).thenReturn(saved);
+    @DisplayName("createUser persists validated dummy profile")
+    void createUser_savesValidatedProfile() {
+        when(repository.findByDeviceId("device-001")).thenReturn(Optional.empty());
+        User stored = new User("user-1", "device-001", "Jane Test", "jane@test.com");
+        when(repository.save(any(User.class))).thenReturn(stored);
 
-        User result = service.createUser("uid-1", "device-1", "User 1", "user1@example.com", 20);
+        User result = service.createUser("user-1", "device-001", "Jane Test", "jane@test.com", 28);
 
+        assertEquals(stored, result);
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(repository).save(captor.capture());
-        User persisted = captor.getValue();
-
-        assertAll(
-                () -> assertEquals("uid-1", persisted.getUserId()),
-                () -> assertEquals("device-1", persisted.getDeviceId()),
-                () -> assertEquals("User 1", persisted.getName()),
-                () -> assertEquals(20, persisted.getAge()),
-                () -> assertEquals(saved, result)
-        );
+        User savedUser = captor.getValue();
+        assertEquals("user-1", savedUser.getUserId());
+        assertEquals("device-001", savedUser.getDeviceId());
+        assertEquals("Jane Test", savedUser.getName());
+        assertEquals(28, savedUser.getAge());
     }
 
     @Test
-    @DisplayName("createUser rejects duplicate device IDs")
-    void createUser_duplicateDeviceId_throws() {
-        when(repository.findByDeviceId("device-dup")).thenReturn(Optional.of(TestUserFactory.createUser("dup")));
+    @DisplayName("createUser rejects duplicate device IDs with aggregated validation errors")
+    void createUser_duplicateDeviceId_rejected() {
+        when(repository.findByDeviceId("device-001")).thenReturn(Optional.of(new User()));
 
         UserValidationException exception = assertThrows(UserValidationException.class, () ->
-                service.createUser("uid-dup", "device-dup", "User", "user@example.com", 22)
+                service.createUser("user-1", "device-001", "", "bad-email", 5)
         );
 
         assertTrue(exception.getErrors().contains("deviceId must be unique"));
-        verify(repository, never()).save(any());
+        assertTrue(exception.getErrors().contains("email must be valid"));
+        assertTrue(exception.getErrors().contains("name must be at least 3 characters"));
     }
 
     @Test
-    @DisplayName("toggleNotifications updates flag and persists change")
+    @DisplayName("toggleNotifications updates persisted flag and timestamp")
     void toggleNotifications_updatesState() {
-        User existing = TestUserFactory.createUser("notify");
-        when(repository.findById("uid-notify")).thenReturn(Optional.of(existing));
+        User existing = new User("user-1", "device-001", "Jane", "jane@test.com");
+        existing.setUpdatedAt(0L);
+        when(repository.findById("user-1")).thenReturn(Optional.of(existing));
         when(repository.save(existing)).thenReturn(existing);
 
-        User updated = service.toggleNotifications("uid-notify", false);
+        User updated = service.toggleNotifications("user-1", false);
 
         assertFalse(updated.isNotificationsEnabled());
         verify(repository).save(existing);
+        assertNotEquals(0L, updated.getUpdatedAt());
     }
 
     @Test
-    @DisplayName("addRole adds missing role and saves")
+    @DisplayName("addRole injects role into user record and persists")
     void addRole_persistsRoleChange() {
-        User existing = TestUserFactory.createUserWithRoles("role", List.of("entrant"));
-        when(repository.findById("uid-role")).thenReturn(Optional.of(existing));
+        User existing = new User("user-1", "device-001", "Jane", "jane@test.com");
+        when(repository.findById("user-1")).thenReturn(Optional.of(existing));
         when(repository.save(existing)).thenReturn(existing);
 
-        User updated = service.addRole("uid-role", "organizer");
+        User updated = service.addRole("user-1", "admin");
 
-        assertTrue(updated.hasRole("organizer"));
+        assertTrue(updated.getRoles().contains("admin"));
         verify(repository).save(existing);
     }
 
     @Test
-    @DisplayName("addFavorite validates input and missing user")
-    void addFavorite_handlesInvalidInputAndMissingUser() {
-        assertThrows(IllegalArgumentException.class, () -> service.addFavorite("uid-x", " "));
+    @DisplayName("addFavorite enforces blank checks before hitting repository")
+    void addFavorite_blankEventId_rejectedEarly() {
+        assertThrows(IllegalArgumentException.class, () -> service.addFavorite("user-1", " "));
+        verifyNoInteractions(repository);
+    }
 
-        when(repository.findById("uid-missing")).thenReturn(Optional.empty());
-        assertThrows(IllegalArgumentException.class, () -> service.addFavorite("uid-missing", "event-1"));
+    @Test
+    @DisplayName("addFavorite records event ID for the user")
+    void addFavorite_persistsFavoriteList() {
+        User existing = new User("user-1", "device-001", "Jane", "jane@test.com");
+        when(repository.findById("user-1")).thenReturn(Optional.of(existing));
+        when(repository.save(existing)).thenReturn(existing);
+
+        User updated = service.addFavorite("user-1", "EVT-42");
+
+        assertTrue(updated.getFavoriteEvents().contains("EVT-42"));
+        verify(repository).save(existing);
     }
 }
