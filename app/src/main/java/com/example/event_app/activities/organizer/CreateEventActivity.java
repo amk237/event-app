@@ -799,23 +799,14 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     /**
-     * Navigate to QR code display activity (existing functionality)
+     * Navigate after QR code dialog is closed
      */
     private void navigateToQRCodeActivity(String eventId, String eventName) {
-        try {
-            Intent intent = new Intent(this, QRCodeDisplayActivity.class);
-            intent.putExtra("eventId", eventId);
-            intent.putExtra("eventName", eventName);
-            startActivity(intent);
-            finish();
-        } catch (Exception e) {
-            // If QRCodeDisplayActivity doesn't exist, just go to MainActivity
-            Log.e(TAG, "QRCodeDisplayActivity not found, navigating to MainActivity", e);
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
-        }
+        // Navigate to MainActivity after QR code is shown
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
     /**
